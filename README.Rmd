@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 
 ## Overview
 
-The goal of *ElasticIntegrative* is toimplement integrative analyses for the heterogenous treatment effect combining a randomized trial and a real-world evidence study.
+The goal of *ElasticIntegrative* is to implement integrative analyses for the heterogenous treatment effect combining a randomized trial and a real-world evidence study from [Yang et al., (2022)](https://arxiv.org/abs/2005.10579).
 
 Two datasets
 
@@ -35,6 +35,7 @@ Two datasets
 devtools::install_github("Gaochenyin/ElasticIntegrative")
 library(ElasticIntegrative)
 ```
+
 
 ## Usage
 
@@ -114,7 +115,7 @@ result.elastic <- elasticHTE(dat.t = dat.t,
 
 ## Value
 
- |
+ **Argument** |
  ------------- | -------------
 est | the HTE estimators including
 i) | `covj.t` the covariate adjustment estimator;
@@ -122,7 +123,7 @@ ii) |   `ee.rt(ml)` the RCT estimating equation estimator with sieve models;
 iii) | `opt.ee(ml)` the RT&RW estimating equation estimator with sieve models;
 iv) |  `elas`the elastic integrative estimator.
 ve|   the bootstrap variance estimates for est.
-CI |  $95\%$ percentiel bootstrap confidence intervals. Note `covj.t`, `ee.rt(ml)`, and `opt.ee(ml)` use the Wald CI and `elas` uses the adaptive  confidence with threshold `sqrt(log(2000))`.
+CI |  95% percentiel bootstrap confidence intervals. Note `covj.t`, `ee.rt(ml)`, and `opt.ee(ml)` use the Wald CI and `elas` uses the adaptive  confidence with threshold `sqrt(log(2000))`.
 
 ```{r echo=FALSE}
 # output the results
