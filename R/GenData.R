@@ -182,9 +182,11 @@ ee1.ml.new <- function(par, dat) {
 }
 
 # handy functions
+#' @export
 expoit <- function(x) {
   return(exp(x) / (1 + exp(x)))
 }
+#' @export
 logit <- function(x) {
   return(log(x / (1 - x)))
 }

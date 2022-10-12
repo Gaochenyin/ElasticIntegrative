@@ -2,3 +2,5 @@
 
 export(GenData)
 export(elasticHTE)
+export(expoit)
+export(logit)

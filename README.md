@@ -1,52 +1,43 @@
----
-output: github_document
----
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-```{r, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>",
-  fig.path = "man/figures/README-",
-  out.width = "100%"
-)
-```
 # ElasticIntegrative
 
 <!-- badges: start -->
 <!-- badges: end -->
 
-
 ## Overview
 
-The goal of *ElasticIntegrative* is toimplement integrative analyses for the heterogenous treatment effect combining a randomized trial and a real-world evidence study.
+The goal of *ElasticIntegrative* is toimplement integrative analyses for
+the heterogenous treatment effect combining a randomized trial and a
+real-world evidence study.
 
 Two datasets
 
-* The randomized trial contains observations on (A,X,Y), where the treatment assignment A is randomized. 
+-   The randomized trial contains observations on (A,X,Y), where the
+    treatment assignment A is randomized.
 
-* The real-world evidence study contains observations on (A,X,Y), where the treatment assignment A may be confounded.
-
+-   The real-world evidence study contains observations on (A,X,Y),
+    where the treatment assignment A may be confounded.
 
 ## Installation with `devtools`:
 
-```{r, eval = FALSE}
+``` r
 devtools::install_github("Gaochenyin/ElasticIntegrative")
 library(ElasticIntegrative)
 ```
 
-
 ## Vignettes
 
-```{r, eval = FALSE}
+``` r
 utils::browseVignettes("ElasticIntegrative")
 ```
 
 ## Usage
 
 This is an example for illustration
-```{r example}
+
+``` r
 library(ElasticIntegrative)
 ## basic example code for data generation
 set.seed(1234)
@@ -121,22 +112,34 @@ dat.os <- list(Y = Y.os, A = A.os, X = X.os, q = rep(1, m))
 ```
 
 ## More examples
-```{r, eval = FALSE}
+
+``` r
 example(ElasticIntegrative::elasticHTE)
 ```
 
-What is special about using `README.Rmd` instead of just `README.md`? You can include R chunks like so:
+What is special about using `README.Rmd` instead of just `README.md`?
+You can include R chunks like so:
 
-```{r cars}
+``` r
 summary(cars)
+#>      speed           dist       
+#>  Min.   : 4.0   Min.   :  2.00  
+#>  1st Qu.:12.0   1st Qu.: 26.00  
+#>  Median :15.0   Median : 36.00  
+#>  Mean   :15.4   Mean   : 42.98  
+#>  3rd Qu.:19.0   3rd Qu.: 56.00  
+#>  Max.   :25.0   Max.   :120.00
 ```
 
-You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date. `devtools::build_readme()` is handy for this. You could also use GitHub Actions to re-render `README.Rmd` every time you push. An example workflow can be found here: <https://github.com/r-lib/actions/tree/v1/examples>.
+You’ll still need to render `README.Rmd` regularly, to keep `README.md`
+up-to-date. `devtools::build_readme()` is handy for this. You could also
+use GitHub Actions to re-render `README.Rmd` every time you push. An
+example workflow can be found here:
+<https://github.com/r-lib/actions/tree/v1/examples>.
 
 You can also embed plots, for example:
 
-```{r pressure, echo = FALSE}
-plot(pressure)
-```
+<img src="man/figures/README-pressure-1.png" width="100%" />
 
-In that case, don't forget to commit and push the resulting figure files, so they display on GitHub and CRAN.
+In that case, don’t forget to commit and push the resulting figure
+files, so they display on GitHub and CRAN.
