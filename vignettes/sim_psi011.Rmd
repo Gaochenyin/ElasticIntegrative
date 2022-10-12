@@ -19,10 +19,30 @@ In this vignette, we will illustrate the use of this package by reproducing the 
 m <- 2000 # size for RWE
 niter <- 2000 # number of replication
 thres.psi  <-  sqrt(log(m)) # threshold for ECI psi
-alltlocalpar <-round((seq(2,0,length.out=10)),2)
+alltlocalpar <- c(2,1,round((seq(0.8,0,length.out=8)),2))
 ```
 Now, we generate the necessary datasets by `GenData` and conduct the proposed method by `elasticHTE` for elastic integrative analyses.
 ```{r eval=FALSE, include=TRUE}
+# psi = c(0, 0, 0)
+elastic_psi000_lists <- lapply(alltlocalpar, function(tlocalpar)
+  {
+  elastic_list <- sapply(1:niter, function(seed)
+  {
+    Data.list <- GenData(beta0 = c(0, 1, 1, 1), # for the mu0 function
+                              psi0 = c(0, 0, 0), # for the contrast function
+                              om.id = 0, es.id = 0,
+                              n = 1e5, mean.x = 1,  # setup for the finite population
+                              n.t = NULL, # for the RCT, use the default sample size
+                              m = m, tlocalpar = tlocalpar, # for the RWE
+                              seed = seed)
+    elasticHTE(Data.list$RT, # RCT
+               Data.list$RW, # RWE
+               fixed = FALSE # adaptive selection strategy
+               )
+  })
+  elastic_list
+})
+# psi = c(0, 1, 1)
 elastic_psi011_lists <- lapply(alltlocalpar, function(tlocalpar)
   {
   elastic_list <- sapply(1:niter, function(seed)
@@ -42,7 +62,7 @@ elastic_psi011_lists <- lapply(alltlocalpar, function(tlocalpar)
   elastic_list
 })
 ```
-At last, we reproduce the summary results in Yang et al., (2022), Table 1 as follow.
+At last, we reproduce the summary results in Yang et al., (2022), Table 1 and the plots in Yang et al., (2022), Figure 4 as follow.
 ```{r include=FALSE}
 library(dplyr)
 library(kableExtra)
@@ -140,4 +160,27 @@ knitr::kable(CI.width.table*1000,
              digits = 0,
              caption = 'Simulation results for widths of 95% confidence intervals ($\\times 10^{-3}$) with nonzero effect modification  $\\psi_1=\\psi_2=1$')%>%
   kable_styling(full_width = FALSE, position = "left")
+```
+```{r fig.height=5, fig.width=8, fig.align = 'center'}
+# tabulate the results for psi 000
+psi <- c(0, 0, 0)
+sim_results_psi00 <-
+  sapply(elastic_psi000_lists, function(res)summary_res(res, psi = psi))
+est.mat.psi00 <- do.call(rbind, sim_results_psi00[1,])
+ve.mat.psi00 <- do.call(rbind, sim_results_psi00[2,])
+row.names(est.mat.psi00) <- row.names(ve.mat.psi00) <- rev(alltlocalpar)
+bias.psi0 <- est.mat.psi00-0
+variance.psi0 <- ve.mat.psi00
+# tabulate the results for psi 011
+psi <- c(0, 1, 1)
+sim_results_psi11 <-
+  sapply(elastic_psi011_lists, function(res)summary_res(res, psi = psi))
+est.mat.psi11 <- do.call(rbind, sim_results_psi11[1,])
+ve.mat.psi11 <- do.call(rbind, sim_results_psi11[2,])
+row.names(est.mat.psi11) <- row.names(ve.mat.psi11) <- rev(alltlocalpar)
+bias.psi1 <- est.mat.psi11-1
+variance.psi1 <- ve.mat.psi11
+# plot the bias, variance and mean squared error
+plt.res.combine(bias.psi0,  bias.psi1,
+                variance.psi0, variance.psi1, AIPW = F)
 ```

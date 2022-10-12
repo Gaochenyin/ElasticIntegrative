@@ -4,12 +4,14 @@
 \alias{elasticHTE}
 \title{Elastic integrative analysis for heterogenous treatment effect}
 \usage{
-elasticHTE(dat.t, dat.os, fixed = FALSE)
+elasticHTE(dat.t, dat.os, thres.psi = sqrt(log(m)), fixed = FALSE)
 }
 \arguments{
 \item{dat.t}{A list contains X, Y and A for RCT.}
 
 \item{dat.os}{A list contains X, Y and A fro RWE.}
+
+\item{thres.psi}{A numerical value indicating the threshold for constructing adaptive confidence interval.}
 
 \item{fixed}{A boolean regarding how to select the tuning parameter \code{c_gamma}.
 \itemize{

@@ -11,6 +11,7 @@
 #'
 #' @param dat.t A list contains X, Y and A for RCT.
 #' @param dat.os A list contains X, Y and A fro RWE.
+#' @param thres.psi A numerical value indicating the threshold for constructing adaptive confidence interval.
 #' @param fixed A boolean regarding how to select the tuning parameter `c_gamma`.
 #' * `FALSE` (the default): use adaptive selection strategy
 #' * `TRUE`: use fixed threshold strategy.
@@ -54,6 +55,7 @@
 #' @export
 elasticHTE <- function(dat.t, # RT
                        dat.os, # RW
+                       thres.psi = sqrt(log(m)), # threshold for adaptive CI
                        fixed = FALSE # fixed c_gamma
                        ) {
   n.t <- length(dat.t$Y)
