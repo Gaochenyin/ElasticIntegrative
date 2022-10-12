@@ -1,4 +1,4 @@
-Package: elasticHTE
+Package: ElasticIntegrative
 Title: Elastic Integrative Analyses for the Heterogenous Treatment Effect Combining a Randomized Trial and a Real-World Evidence Study
 Version: 1.0
 Authors@R: c(
