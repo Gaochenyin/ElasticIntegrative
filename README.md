@@ -104,35 +104,46 @@ result.elastic <- elasticHTE(dat.t = dat.t,
                              fixed = FALSE)
 ```
 
+## Value
+
+|                    |                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+|--------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| est                | the HTE estimators including                                                                                                                                                                                                                                                                                                                                                                                                       |
+| i\) `covj.t`       | the covariate adjustment estimator;                                                                                                                                                                                                                                                                                                                                                                                                |
+| ii\) `ee.rt(ml)`   | the RCT estimating equation estimator with sieve models;                                                                                                                                                                                                                                                                                                                                                                           |
+| iii\) `opt.ee(ml)` | the RT&RW estimating equation estimator with sieve models;                                                                                                                                                                                                                                                                                                                                                                         |
+| iv\) `elas`        | the elastic integrative estimator.                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ve                 | the bootstrap variance estimates for est.                                                                                                                                                                                                                                                                                                                                                                                          |
+| CI                 | ![95\\%](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;95%5C%25 "95\%") percentiel bootstrap confidence intervals. Note `covj.t`, `ee.rt(ml)`, and `opt.ee(ml)` use the Wald CI and `elas` uses the adaptive confidence with threshold hold ![\\\\sqrt(log(2000))](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5C%5Csqrt%28log%282000%29%29 "\\sqrt(log(2000))"). |
+
     #> est
-    #>  ee.rt(ml).1  ee.rt(ml).2  ee.rt(ml).3 opt.ee(ml).1 opt.ee(ml).2 opt.ee(ml).3 
-    #>  -0.06010648   0.92470952   0.96831571   0.01705285   1.03611492   1.00334316 
-    #>       elas.1       elas.2       elas.3 
-    #>   0.01705285   1.03611492   1.00334316
+    #>     covj.t.1     covj.t.2     covj.t.3  ee.rt(ml).1  ee.rt(ml).2  ee.rt(ml).3 
+    #>  -0.06580780   0.92695213   0.95677131  -0.06010648   0.92470952   0.96831571 
+    #> opt.ee(ml).1 opt.ee(ml).2 opt.ee(ml).3       elas.1       elas.2       elas.3 
+    #>   0.01705285   1.03611492   1.00334316   0.01705285   1.03611492   1.00334316
     #> ve
-    #>  ee.rt(ml).1  ee.rt(ml).2  ee.rt(ml).3 opt.ee(ml).1 opt.ee(ml).2 opt.ee(ml).3 
-    #>  0.027115933  0.017241212  0.016890441  0.005879353  0.004517951  0.003443317 
-    #>       elas.1       elas.2       elas.3 
-    #>  0.005813113  0.004243598  0.003365946
+    #>     covj.t.1     covj.t.2     covj.t.3  ee.rt(ml).1  ee.rt(ml).2  ee.rt(ml).3 
+    #>  0.026325149  0.016814029  0.016064106  0.027115933  0.017241212  0.016890441 
+    #> opt.ee(ml).1 opt.ee(ml).2 opt.ee(ml).3       elas.1       elas.2       elas.3 
+    #>  0.005879353  0.004517951  0.003443317  0.005813113  0.004243598  0.003365946
     #> CI
     #>                   lower     upper
+    #> covj.t.1     -0.3838125 0.2521969
+    #> covj.t.2      0.6728057 1.1810985
+    #> covj.t.3      0.7083571 1.2051855
     #> ee.rt(ml).1  -0.3828521 0.2626391
     #> ee.rt(ml).2   0.6673549 1.1820642
     #> ee.rt(ml).3   0.7135925 1.2230390
     #> opt.ee(ml).1 -0.1332312 0.1673369
     #> opt.ee(ml).2  0.9043746 1.1678553
     #> opt.ee(ml).3  0.8883329 1.1183534
-    #> elas.1       -0.1323822 0.1664879
-    #> elas.2        0.9084372 1.1637927
-    #> elas.3        0.8896324 1.1170539
+    #> elas.v2.1    -0.1817016 0.1258570
+    #> elas.v2.2     0.7924430 1.0538978
+    #> elas.v2.3     0.8621319 1.0799019
 
 ## More examples
 
 ``` r
 example(ElasticIntegrative::elasticHTE)
-```
-
-``` r
 utils::browseVignettes("ElasticIntegrative")
-# remember to use build_readme() after every update
 ```
