@@ -17,7 +17,7 @@ GenData <- function(seed = NULL,
                     m = 2000, tlocalpar = 0, # size and bias for the RWE
                     n.t = NULL, equal.weight = T, # size for the RCT (NULL uses the default)
                     overlap = T) {
-  if(!is.null())set.seed(seed)
+  if(!is.null(seed))set.seed(seed)
   if (overlap == T) {
     X1 <- rnorm(n, mean.x, 1)
     X2 <- rnorm(n, mean.x, 1)
