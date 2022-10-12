@@ -42,7 +42,7 @@
 #' result.elastic <- elasticHTE(dat.t = datasets.all$RT,
 #'                              dat.os = datasets.all$RW,
 #'                              fixed = TRUE)
-#'
+#' result.elastic
 #' # return: a list called result.elastic
 #' # $est: estimates of the psi in the finite population
 #' # $ve: variance estimation of the psi by permutation-based estimation
