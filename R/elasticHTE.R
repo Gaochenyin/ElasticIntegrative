@@ -25,14 +25,15 @@
 #' @examples
 #' m <- 2000 # size of RW dataset
 #' # generate the data
-#' datasets.all <- GenerateData(psi0 = c(0,1,1),
+#' datasets.all <- GenData(psi0 = c(0,1,1),
 #'                              tlocalpar = 2,
 #'                              m = m)
 #' # choice of kappa_n, default is tau * sqrt(log(m)) (similar to BIC criteria)
 #' thres.psi  <-  sqrt(log(m)) # threshold for ECI psi
 #' # conduct the elastic integrative analysis
-#' result.elastic <- ElasticEst(dat.t = datasets.all$RT,
-#'                              dat.os = datasets.all$RW)
+#' result.elastic <- elasticHTE(dat.t = datasets.all$RT,
+#'                              dat.os = datasets.all$RW,
+#'                              fixed = TRUE)
 #' @export
 elasticHTE <- function(dat.t, # RT
                        dat.os, # RW
