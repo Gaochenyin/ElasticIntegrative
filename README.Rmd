@@ -114,7 +114,8 @@ result.elastic <- elasticHTE(dat.t = dat.t,
 
 ## Value
 
- | --------------- | -------------
+ |
+ --------------- | -------------
 est | the HTE estimators including
 i) `covj.t` |  the covariate adjustment estimator;
 ii) `ee.rt(ml)`|  the RCT estimating equation estimator with sieve models;
