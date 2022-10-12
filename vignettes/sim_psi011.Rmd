@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
 )
 library(ElasticIntegrative)
 ```
-In this vignette, we will illustrate the use of this package by reproducing the simulation studies in Yang et. al. (2022), Section 4. The following codes layout the simulation setups.
+In this vignette, we will illustrate the use of this package by reproducing the simulation studies in Yang et al., (2022), Section 4. The following codes layout the simulation setups.
 ```{r echo=TRUE}
 m <- 2000 # size for RWE
 niter <- 2000 # number of replication
@@ -42,7 +42,7 @@ elastic_psi011_lists <- lapply(alltlocalpar, function(tlocalpar)
   elastic_list
 })
 ```
-At last, we reproduce the summary results in Yang et. al., Table 1 as follow.
+At last, we reproduce the summary results in Yang et al., (2022), Table 1 as follow.
 ```{r include=FALSE}
 library(dplyr)
 library(kableExtra)

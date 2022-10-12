@@ -55,7 +55,7 @@ thres.psi  <-  sqrt(log(m)) # threshold for ECI psi
 # conduct the elastic integrative analysis
 result.elastic <- elasticHTE(dat.t = datasets.all$RT,
                              dat.os = datasets.all$RW,
-                             fixed = TRUE)
+                             fixed = FALSE)
 result.elastic
 # return: a list called result.elastic
 # $est: estimates of the psi in the finite population
