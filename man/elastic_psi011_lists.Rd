@@ -5,7 +5,7 @@
 \alias{elastic_psi011_lists}
 \title{Simulation results for beta0 = c(0,1,1,1) and psi0 = c(0,1,1) in Yang et al., (2022), Section 4}
 \format{
-##\code{elastic_psi011_lists}
+\code{elastic_psi011_lists}
 A data list with length 10,
 each one associated with different strength of unmeasured confounding (e.g., 0, ..., 2)
 }

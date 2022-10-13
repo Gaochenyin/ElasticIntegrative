@@ -173,12 +173,10 @@ plt.res.combine <- function(bias.psi0, bias.psi1,
                             variance.psi0, variance.psi1,
                             AIPW = T)
 {
-  library(latex2exp)
-  library(ggplot2)
+
   bias.psi0 <- abs(bias.psi0);bias.psi1 <- abs(bias.psi1)
   mse.psi0 <- variance.psi0 + bias.psi0^2
   mse.psi1 <- variance.psi1 + bias.psi1^2
-  library(tidyr)
 
   est_bias_m0 <- reshape2::melt(bias.psi0, varnames = c('b', 'param'))%>%
     cbind(name = 'bias')%>%separate(param, c('param', 'dim'), sep = '[.]')%>%
@@ -331,4 +329,78 @@ plt.res.combine <- function(bias.psi0, bias.psi1,
   grid.draw(gt1)
 
 
+}
+
+#' summarize the results
+#' @description
+#' `summary_res()` summarizes the simulation outputs
+#' @export
+summary_res <- function(res, psi)
+{
+  # est
+  est.mat <- do.call(rbind, lapply(res, function(x)x[[1]][c(paste0('covj.t.',2:3),
+                                                            paste0('ee.rt(ml).',2:3),
+                                                            paste0('opt.ee(ml).',2:3),
+                                                            paste0('elas.',2:3))]))
+  colnames(est.mat) <- c(paste0('AIPW.',2:3),
+                         paste0('RT.',2:3),
+                         paste0('EE.',2:3),
+                         paste0('ELAS.',2:3))
+  ve.mat <- do.call(rbind, lapply(res, function(x)x[[2]][c(paste0('covj.t.',2:3),
+                                                           paste0('ee.rt(ml).',2:3),
+                                                           paste0('opt.ee(ml).',2:3))]))
+  est <- apply(est.mat, 2, mean)
+  est.ve <- apply(est.mat, 2, var)
+
+  # CI
+  inf.mat <- est.mat[,c(paste0('AIPW.',2:3),
+                        paste0('RT.',2:3),
+                        paste0('EE.',2:3))]-qnorm(1-0.05/2)*sqrt(ve.mat)
+  sup.mat <- est.mat[,c(paste0('AIPW.',2:3),
+                        paste0('RT.',2:3),
+                        paste0('EE.',2:3))]+qnorm(1-0.05/2)*sqrt(ve.mat)
+
+  inf.elas.mat <- est.mat[,paste0('ELAS.', 2:3)]+
+    do.call(rbind, lapply(res, function(x)x[[3]][paste0('elas1.',2:3)]))
+  sup.elas.mat <- est.mat[,paste0('ELAS.', 2:3)]+
+    do.call(rbind, lapply(res, function(x)x[[4]][paste0('elas1.',2:3)]))
+  ## width
+  CI.width <- c(apply(sup.mat-inf.mat, 2, mean),
+                apply(sup.elas.mat-inf.elas.mat, 2, mean))
+  ## CP
+  # CP.mat.0 <- inf.mat<rep(psi[2:3],3)&
+  #   sup.mat>rep(psi[2:3],3)
+
+  CP <- c(apply(inf.mat<rep(psi[2:3],3)&
+                  sup.mat>rep(psi[2:3],3), 2, mean),
+          apply(inf.elas.mat<psi[2:3]&
+                  sup.elas.mat>psi[2:3], 2, mean))
+  # type I error
+  error <- apply(cbind(inf.mat>0|sup.mat<0,
+                       inf.elas.mat>0|sup.elas.mat<0),
+                 2, mean)
+  # nuisance parameter
+  nuisapar.mean <- apply(do.call(rbind, lapply(res, function(x)x$nuispar[c('eta1', 'eta2', 'eta3',
+                                                                           'gamma1','c_gamma1',
+                                                                           'Icomb1','Icomb2','Icomb3')])),
+                         2, mean)
+  nuisapar.sd <- apply(do.call(rbind, lapply(res, function(x)x$nuispar[c('eta1', 'eta2', 'eta3',
+                                                                         'gamma1','c_gamma1',
+                                                                         'Icomb1','Icomb2','Icomb3')])),
+                       2, sd)
+  # prob.elas <- lapply(res, function(x)
+  #   x$nuispar['Tstat.psi']>
+  #     x$nuispar['c_gamma1'])%>%unlist()
+  prob.elas <- 1-unname(unlist(lapply(res, function(x)x$nuispar['conservative'])))
+  prob.elas.mean <- mean(prob.elas)
+  prob.elas.sd <- sd(prob.elas)
+  list(est = est,
+       ve = est.ve,
+       CI.width = CI.width,
+       CP = CP,
+       error = error,
+       nuisapar.mean = nuisapar.mean,
+       nuisapar.sd = nuisapar.sd,
+       prob.elas.mean = prob.elas.mean,
+       prob.elas.sd = prob.elas.sd)
 }
