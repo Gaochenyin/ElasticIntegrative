@@ -65,7 +65,6 @@ elastic_psi011_lists <- lapply(alltlocalpar, function(tlocalpar)
 At last, we reproduce the summary results in Yang et al., (2022), Table 1 and the plots in Yang et al., (2022), Figure 4 as follow.
 ```{r include=FALSE}
 library(dplyr)
-library(kableExtra)
 summary_res <- function(res, psi)
 {
 
@@ -155,11 +154,11 @@ row.names(CP.width.table) <- rev(alltlocalpar)
 knitr::kable(CP.width.table*100,
              digits = 1,
              caption = 'Simulation results for coverage rates (%) with nonzero effect modification  $\\psi_1=\\psi_2=1$')%>%
-  kable_styling(full_width = FALSE, position = "float_left")
+  kableExtra::kable_styling(full_width = FALSE, position = "float_left")
 knitr::kable(CI.width.table*1000,
              digits = 0,
              caption = 'Simulation results for widths of 95% confidence intervals ($\\times 10^{-3}$) with nonzero effect modification  $\\psi_1=\\psi_2=1$')%>%
-  kable_styling(full_width = FALSE, position = "left")
+  kableExtra::kable_styling(full_width = FALSE, position = "left")
 ```
 ```{r fig.height=5, fig.width=8, fig.align = 'center'}
 # tabulate the results for psi 000

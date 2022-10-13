@@ -15,6 +15,7 @@ Imports:
     rootSolve,
     MASS,
     expm,
+    kableExtra,
     mvtnorm
 Suggests: 
     knitr,
