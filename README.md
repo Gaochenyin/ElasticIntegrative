@@ -108,15 +108,15 @@ result.elastic <- elasticHTE(dat.t = dat.t,
 
 ## Value
 
-| **Argument** |                                                                                                                                                                                       |
-|--------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| est          | the HTE estimators including                                                                                                                                                          |
-| i\)          | `covj.t` the covariate adjustment estimator;                                                                                                                                          |
-| ii\)         | `ee.rt(ml)` the RCT estimating equation estimator with sieve models;                                                                                                                  |
-| iii\)        | `opt.ee(ml)` the RT&RW estimating equation estimator with sieve models;                                                                                                               |
-| iv\)         | `elas`the elastic integrative estimator.                                                                                                                                              |
-| ve           | the bootstrap variance estimates for est.                                                                                                                                             |
-| CI           | 95% percentiel bootstrap confidence intervals. Note `covj.t`, `ee.rt(ml)`, and `opt.ee(ml)` use the Wald CI and `elas` uses the adaptive confidence with threshold `sqrt(log(2000))`. |
+| **Argument** |                                                                                                                                                                                        |
+|--------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| est          | the HTE estimators including                                                                                                                                                           |
+| i\)          | `covj.t` the covariate adjustment estimator;                                                                                                                                           |
+| ii\)         | `ee.rt(ml)` the RCT estimating equation estimator with sieve models;                                                                                                                   |
+| iii\)        | `opt.ee(ml)` the RT&RW estimating equation estimator with sieve models;                                                                                                                |
+| iv\)         | `elas`the elastic integrative estimator.                                                                                                                                               |
+| ve           | the bootstrap variance estimates for est.                                                                                                                                              |
+| CI           | 95% percentiel bootstrap confidence intervals. Note `covj.t`, `ee.rt(ml)`, and `opt.ee(ml)` use the Wald CI, and `elas` uses the adaptive confidence with threshold `sqrt(log(2000))`. |
 
     #> est
     #>     covj.t.1     covj.t.2     covj.t.3  ee.rt(ml).1  ee.rt(ml).2  ee.rt(ml).3 
