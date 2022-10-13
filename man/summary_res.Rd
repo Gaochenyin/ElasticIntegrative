@@ -7,5 +7,5 @@
 summary_res(res, psi)
 }
 \description{
-\code{summary_res()} summarizes the simulation outputs
+\code{summary_res()} summarizes the simulation outputs in Yang et al., (2022), Table 1
 }

@@ -333,7 +333,7 @@ plt.res.combine <- function(bias.psi0, bias.psi1,
 
 #' summarize the results
 #' @description
-#' `summary_res()` summarizes the simulation outputs
+#' `summary_res()` summarizes the simulation outputs in Yang et al., (2022), Table 1
 #' @export
 summary_res <- function(res, psi)
 {
