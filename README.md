@@ -24,7 +24,8 @@ Two datasets
 ## Installation with `devtools`:
 
 ``` r
-devtools::install_github("Gaochenyin/ElasticIntegrative", build_vignettes = TRUE) # include the vignettes
+devtools::install_github("Gaochenyin/ElasticIntegrative", 
+                         build_vignettes = TRUE) # include the vignettes
 library(ElasticIntegrative)
 ```
 

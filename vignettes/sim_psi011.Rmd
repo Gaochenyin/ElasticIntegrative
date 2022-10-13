@@ -18,7 +18,7 @@ In this vignette, we will illustrate the use of this package by reproducing the 
 ```{r echo=TRUE}
 m <- 2000 # size for RWE
 niter <- 2000 # number of replication
-thres.psi  <-  sqrt(log(m)) # threshold for ECI psi
+thres.psi  <-  sqrt(log(m)) # threshold for ACI psi
 alltlocalpar <- c(2,1,round((seq(0.8,0,length.out=8)),2))
 ```
 Now, we generate the necessary datasets by `GenData` and conduct the proposed method by `elasticHTE` for elastic integrative analyses.
@@ -37,7 +37,7 @@ elastic_psi000_lists <- lapply(alltlocalpar, function(tlocalpar)
                               seed = seed)
     elasticHTE(Data.list$RT, # RCT
                Data.list$RW, # RWE
-               thres.psi = sqrt(log(m)),
+               thres.psi = thres.psi,
                fixed = FALSE # adaptive selection strategy
                )
   })
@@ -57,7 +57,7 @@ elastic_psi011_lists <- lapply(alltlocalpar, function(tlocalpar)
                               seed = seed)
     elasticHTE(Data.list$RT, # RCT
                Data.list$RW, # RWE
-               thres.psi = sqrt(log(m)),
+               thres.psi = thres.psi,
                fixed = FALSE # adaptive selection strategy
                )
   })
@@ -133,7 +133,7 @@ knitr::kable(CI.width.mat.psi11*1000,
   kableExtra::kable_styling(full_width = FALSE, position = "left")
 ```
 
-```{r echo=FALSE, fig.height=5, fig.width=7, fig.align = 'center'}
+```{r echo=FALSE, fig.height=4.5, fig.width=6, fig.align = 'center'}
 # plot the bias, variance and mean squared error
 plt.res.combine(bias.psi0,  bias.psi1,
                 variance.psi0, variance.psi1, AIPW = F)
