@@ -12,10 +12,10 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-library(ElasticIntegrative)
 ```
 In this vignette, we will illustrate the use of this package by reproducing the simulation studies in Yang et al., (2022), Section 4. The following codes layout the simulation setups.
 ```{r echo=TRUE}
+library(ElasticIntegrative)
 m <- 2000 # size for RWE
 niter <- 2000 # number of replication
 thres.psi  <-  sqrt(log(m)) # threshold for ACI psi

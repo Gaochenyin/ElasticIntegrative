@@ -147,6 +147,5 @@ result.elastic <- elasticHTE(dat.t = dat.t,
 ## More examples
 
 ``` r
-example(ElasticIntegrative::elasticHTE)
-utils::browseVignettes("ElasticIntegrative")
+browseVignettes("ElasticIntegrative")
 ```

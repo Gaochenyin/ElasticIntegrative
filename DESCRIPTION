@@ -3,9 +3,9 @@ Title: Elastic Integrative Analyses for the Heterogenous Treatment Effect Combin
 Version: 1.0
 Authors@R: c(
     person("Shu", "Yang", , "syang24@ncsu.edu", role = c("aut")),
-    person("Chenyin", "Gao", , "cgao6@ncsu.edu", role = c("cre"))
+    person("Chenyin", "Gao", , "cgao6@ncsu.edu", role = c("aut", "cre"))
     )
-Description: What the package does (one paragraph).
+Description: Elastic Integrative Analyses for the Heterogenous Treatment Effect Combining a Randomized Trial and a Real-World Evidence Study.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

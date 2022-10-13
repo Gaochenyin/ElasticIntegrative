@@ -154,7 +154,6 @@ cbind(lower = result.elastic$CIs.inf[c(paste0('covj.t.',1:3),
 
 ## More examples
 ```{r eval=FALSE, include=TRUE}
-example(ElasticIntegrative::elasticHTE)
-utils::browseVignettes("ElasticIntegrative")
+browseVignettes("ElasticIntegrative")
 ```
 
