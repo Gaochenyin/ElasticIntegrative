@@ -133,7 +133,7 @@ knitr::kable(CI.width.mat.psi11*1000,
   kableExtra::kable_styling(full_width = FALSE, position = "left")
 ```
 
-```{r echo=FALSE, fig.height=4.5, fig.width=6, fig.align = 'center'}
+```{r echo=FALSE, fig.height=5, fig.width=6.5, fig.align = 'center'}
 # plot the bias, variance and mean squared error
 plt.res.combine(bias.psi0,  bias.psi1,
                 variance.psi0, variance.psi1, AIPW = F)
