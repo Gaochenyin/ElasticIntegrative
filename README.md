@@ -24,6 +24,7 @@ Two datasets
 ## Installation with `devtools`:
 
 ``` r
+# it takes around 30s for the download, including the vignettes
 devtools::install_github("Gaochenyin/ElasticIntegrative", 
                          build_vignettes = TRUE) # include the vignettes
 library(ElasticIntegrative)
@@ -108,7 +109,7 @@ result.elastic <- elasticHTE(dat.t = dat.t,
 
 ## Value
 
-| **Argument** |                                                                                                                                                                                        |
+| **Argument** | **Description**                                                                                                                                                                        |
 |--------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | est          | the HTE estimators including                                                                                                                                                           |
 | i\)          | `covj.t` the covariate adjustment estimator;                                                                                                                                           |
