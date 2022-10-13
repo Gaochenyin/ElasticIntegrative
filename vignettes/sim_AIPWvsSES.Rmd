@@ -1,0 +1,83 @@
+---
+title: "Simulation example: comparing AIPW and SES"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Simulation example: comparing AIPW and SES}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+library(ElasticIntegrative)
+```
+In this vignette, we will compare the performances of the AIPW-adjusted approach and the SES approach based on RT data (Yang et al., (2022), Section S4.1). The data generating mechanism is the same as in [here](sim_psi011_111.html) except
+that we now consider different propensity score distributions. 
+
+* (weak separation of propensity score distributions by treatment group) $\alpha = (-2,-1,-1)$.
+
+* (median separation of propensity score distributions by treatment group) $\alpha = (-2,-2,-2)$.
+
+* (strong separation of propensity score distributions by treatment group) $\alpha = (-2,-3,-3)$.
+
+The following figure shows the propensity score distributions by treatment group and demonstrates the degrees of separation in the three scenarios. 
+```{r ps_dist, fig.cap = " Illustration of the propensity score distributions by treatment group under weak, median and strong separations", echo=FALSE, fig.height=5, fig.width=6.5, fig.align = 'center'}
+library(ggplot2)
+# treatment plot
+set.seed(1)
+mean.x <- 1;n <- 1e5
+# change mean to 1; intercept
+X1 <- rnorm(n, mean.x, 1); X2 <- rnorm(n, mean.x, 1);
+f.X <- cbind(X1, X2)
+# true ATE
+eS <- expoit(-4.5 -2 * X1 -2 *  X2)
+S <- sapply(eS,rbinom,n = 1, size = 1)
+S.ind <- which(S==1)
+X.t <- f.X[S.ind,]
+n.t <- length(S.ind)
+# need to change to produce for weight = -2
+ps.t.1 <- expoit(-2+X.t%*%c(-1,-1))
+ps.t.2 <- expoit(-2+X.t%*%c(-2,-2))
+ps.t.3 <- expoit(-2+X.t%*%c(-3,-3))
+A.t.1  <- rbinom(n.t,1,ps.t.1)
+A.t.2  <- rbinom(n.t,1,ps.t.2)
+A.t.3  <- rbinom(n.t,1,ps.t.3)
+
+ps.mat <- cbind(c(ps.t.1, ps.t.2, ps.t.3),
+      c(A.t.1, A.t.2, A.t.3),
+      c(rep(1, n.t),
+        rep(2, n.t),
+        rep(3, n.t)))
+
+xy.labs <- c('Weak',
+             'Median',
+             'Strong')
+names(xy.labs) <- 1:3
+
+ggplot(data = data.frame(ps.mat),
+       aes(x = X1, fill = as.factor(X2)))+
+  geom_density(alpha = 0.5)+
+  facet_wrap(~X3, scales = "free",
+             labeller =as_labeller(xy.labs))+
+  theme(legend.position = 'top')+
+  theme(axis.text = element_text(size = 10),
+        text = element_text(size = 12),
+        legend.text=element_text(size=12))+
+  theme(plot.margin=unit(c(0.3,0.3,0,0),"cm"),
+        panel.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.line = element_line(colour = "black"))+
+  scale_fill_discrete(name = 'A')+xlab('')
+```
+
+The simulation results for comparing RT.AIPW and RT.SES are the following:
+```{r}
+summary.res.overlap <- summary_res(elastic_aipw_ses_l1_list,
+                                   psi = c(0,1,1))
+summary.res.overlap
+
+```

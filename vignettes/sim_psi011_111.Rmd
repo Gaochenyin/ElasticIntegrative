@@ -1,8 +1,8 @@
 ---
-title: "Simulation example"
+title: "Simulation example: adaptive selection"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Simulation example}
+  %\VignetteIndexEntry{Simulation example: adaptive selection}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
