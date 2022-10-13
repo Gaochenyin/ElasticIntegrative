@@ -14,6 +14,9 @@ knitr::opts_chunk$set(
 )
 ```
 ```{r, include = FALSE}
+library(ggplot2)
+library(dplyr)
+library(ElasticIntegrative)
 output_function <- function(summary.res)
 {
   bias <- (summary.res$est[c(paste0('AIPW.', 2:3),
@@ -40,10 +43,7 @@ that we now consider different propensity score distributions.
 * (strong separation of propensity score distributions by treatment group) $\alpha = (-2,-3,-3)$.
 
 The following figure shows the propensity score distributions by treatment group and demonstrates the degrees of separation in the three scenarios. 
-```{r ps_dist, fig.cap = " Illustration of the propensity score distributions by treatment group under weak, median and strong separations", echo=FALSE, fig.height=5, fig.width=6.5, fig.align = 'center'}
-library(ggplot2)
-library(dplyr)
-library(ElasticIntegrative)
+```{r ps_dist, echo = TRUE, echo=FALSE, fig.height=5, fig.width=6.5, fig.align = 'center'}
 # treatment plot
 set.seed(1)
 mean.x <- 1;n <- 1e5
@@ -105,13 +105,13 @@ tab.l1 <- output_function(summary.res.l1)
 tab.l2 <- output_function(summary.res.l2)
 tab.l3 <- output_function(summary.res.l3)
 # output
-knitr::kable(tab.l1, digits = 0,
+knitr::kable(tab.l1, digits = 1,
              caption = 'Case 1: weak separation')%>%
   kableExtra::kable_styling(full_width = FALSE, position = "float_left")
-knitr::kable(tab.l2, digits = 0,
+knitr::kable(tab.l2, digits = 1,
              caption = 'Case 2: median separation')%>%
   kableExtra::kable_styling(full_width = FALSE, position = "float_left")
-knitr::kable(tab.l3, digits = 0,
+knitr::kable(tab.l3, digits = 1,
              caption = 'Case 3: strong separation')%>%
-  kableExtra::kable_styling(full_width = FALSE, position = "left")
+  kableExtra::kable_styling(full_width = FALSE, position = "float_left")
 ```

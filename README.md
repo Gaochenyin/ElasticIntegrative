@@ -24,9 +24,9 @@ Two datasets
 ## Installation with `devtools`:
 
 ``` r
-# it takes around 30s for the download, including the vignettes
+# it takes around 1 minute for the downloads, including the vignettes
 devtools::install_github("Gaochenyin/ElasticIntegrative", 
-                         build_vignettes = TRUE) # include the vignettes
+                         build_vignettes = TRUE) 
 library(ElasticIntegrative)
 ```
 
@@ -51,7 +51,7 @@ X3.rt <- rnorm(n, mean.x, 1)
 X1.os <- rnorm(n, mean.x, 1)
 X2.os <- rnorm(n, mean.x, 1)
 X3.os <- rnorm(n, mean.x, 1) 
-## construct functions
+## construct the basis functions
 h.X.rt <- cbind(X1.rt, X2.rt, X3.rt)
 h.X.os <- cbind(X1.os, X2.os, X3.os)
 f.X.rt <- cbind(X1.rt, X2.rt)
@@ -91,19 +91,20 @@ eA <- exp(0.058 - 1 * X.os[, 1] + 1 * X.os[, 2] - tlocalpar * X.confounder.os)/
   {1+exp(0.058 - 1 * X.os[, 1] + 1 * X.os[, 2] - tlocalpar * X.confounder.os)}
 A.os <- sapply(eA, rbinom, n = 1, size = 1)
 Y.os <- Y1.os * A.os + Y0.os * (1 - A.os)
-# sort the RT and RW datasets
+# organize the RT and RW datasets
 dat.t <- list(
   Y = Y.rt, A = A.rt, X = X.rt, q = rep(1, n.t),
   ps = ps.t,
   ml.ps = ps.t
 )
-dat.os <- list(Y = Y.os, A = A.os, X = X.os, q = rep(1, m))
+dat.os <- list(
+  Y = Y.os, A = A.os, X = X.os, q = rep(1, m)
+  )
 # begin the elastic integrative analysis
-# choice of kappa_n, default is tau = 1 (similar to BIC criteria)
-tau <- 1
+# choice of kappa_n, default is sqrt(log(m)) (similar to the BIC criteria)
 result.elastic <- elasticHTE(dat.t = dat.t,
                              dat.os = dat.os,
-                             thres.psi = tau * sqrt(log(m)), # threshold for ACI psi
+                             thres.psi = sqrt(log(m)), # threshold for ACI psi
                              fixed = FALSE)
 ```
 
@@ -117,7 +118,7 @@ result.elastic <- elasticHTE(dat.t = dat.t,
 | iii\)        | `opt.ee(ml)` the RT&RW estimating equation estimator with sieve models;                                                                                                                |
 | iv\)         | `elas`the elastic integrative estimator.                                                                                                                                               |
 | ve           | the bootstrap variance estimates for est.                                                                                                                                              |
-| CI           | 95% percentiel bootstrap confidence intervals. Note `covj.t`, `ee.rt(ml)`, and `opt.ee(ml)` use the Wald CI, and `elas` uses the adaptive confidence with threshold `sqrt(log(2000))`. |
+| CI           | 95% percentile bootstrap confidence intervals. Note `covj.t`, `ee.rt(ml)`, and `opt.ee(ml)` use the Wald CI, and `elas` uses the adaptive confidence with threshold `sqrt(log(2000))`. |
 
     #> est
     #>     covj.t.1     covj.t.2     covj.t.3  ee.rt(ml).1  ee.rt(ml).2  ee.rt(ml).3 
