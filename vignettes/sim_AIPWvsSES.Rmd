@@ -93,7 +93,7 @@ ggplot(data = data.frame(ps.mat),
 ```
 
 The simulation results (Yang et al., (2022), Table S2) for comparing RT.AIPW and RT.SES are the following:
-```{r include=FALSE}
+```{r echo=FALSE}
 summary.res.l1 <- summary_res(elastic_aipw_ses_l1_list,
                                    psi = c(0,1,1))
 summary.res.l2 <- summary_res(elastic_aipw_ses_l2_list,
