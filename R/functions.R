@@ -49,130 +49,17 @@ coord_panel_ranges <- function(panel_ranges, expand = TRUE, default = FALSE, cli
   ggplot2::ggproto(NULL, UniquePanelCoords, panel_ranges = panel_ranges,
                    expand = expand, default = default, clip = clip)
 }
-# plot
-plt.res <- function(bias, variance)
-{
-  library(latex2exp)
-  library(ggplot2)
-  bias <- abs(bias)
-  mse <- variance + bias^2
-  library(tidyr)
-  est_bias_m <- reshape2::melt(bias, varnames = c('b', 'param'))%>%
-    cbind(name = 'bias')%>%separate(param, c('param', 'dim'), sep = '[.]')
 
-  est_var_m <- reshape2::melt(variance, varnames = c('b', 'param'))%>%
-    cbind(name = 'variance')%>%separate(param, c('param', 'dim'), sep = '[.]')
-
-  est_mse_m <- reshape2::melt(mse, varnames = c('b', 'param'))%>%
-    cbind(name = 'mse')%>%separate(param, c('param', 'dim'), sep = '[.]')
-
-  est_all_m <- rbind(est_bias_m, est_var_m, est_mse_m)
-  xy.labs <- c(c('psi[2]',
-                 'psi[3]'),
-               c('bias', 'var', 'mse'))
-  names(xy.labs) <- c('2', '3',
-                      'bias', 'variance', 'mse')
-
-  library(ggplot2)
-  # delete the elast 0
-  # est_all_m <- subset(est_all_m, subset = dim!=0)
-  est_all_m$param <- factor(est_all_m$param, levels = c('AIPW', 'RT', 'EE', 'ELAS'))
-  # begin our plots
-  gg_color_hue <- function(n) {
-    hues = seq(15, 375, length = n + 1)
-    hcl(h = hues, l = 65, c = 100)[1:n]
-  }
-
-  est_all_m <- est_all_m[!est_all_m$dim=='tau',]
-  p1 <-
-    ggplot(est_all_m, aes(x=b, y=value,
-                          color = param,
-                          shape = param))+
-    geom_line(size = 0.8)+geom_point(stroke = 2)+
-    facet_wrap(c('dim','name'), scales = "free",
-               labeller =as_labeller(xy.labs,
-                                     default = label_parsed))+theme(legend.position = 'top')+
-    ylab('')+
-    theme(strip.background = element_blank(),
-          strip.text = element_blank(),
-          axis.text = element_text(size = 10),
-          text = element_text(size = 12),
-          legend.text=element_text(size=12))+
-    coord_panel_ranges(panel_ranges = list(
-      list(y=c(-0.01,0.2)),
-      list(y=c(0,0.022)),
-      list(y=c(0,0.04)),
-
-      list(y=c(-0.01,0.2)),
-      list(y=c(0,0.022)),
-      list(y=c(0,0.04))))+
-    scale_shape_discrete(solid = T,
-                         name = '', label = c('aipw',
-                                              'rt', 'eff',
-                                              'elas'))+
-    scale_color_manual(values = c('#67D5B5',
-                                  '#EE7785',
-                                  '#C89EC4',
-                                  '#84B1ED'),
-                       name = '', label = c('aipw',
-                                            'rt', 'eff',
-                                            'elas'))+
-    # c('#67D5B5',
-    #   '#EE7785',
-    #   '#C89EC4',
-    #   '#84B1ED')
-
-    theme(plot.margin=unit(c(0.3,0.3,0,0),"cm"),
-          panel.background = element_blank(),
-          panel.grid.major = element_blank(),
-          panel.grid.minor = element_blank(),
-          axis.line = element_line(colour = "black"))
-
-  p2 <- ggplot(est_all_m, aes(x=b, y=value,
-                              color = param,
-                              shape = param))+
-    geom_line()+geom_point(stroke = .25)+
-    theme(axis.text = element_text(size = 12),
-          text = element_text(size = 15),
-          legend.text=element_text(size=12))+
-    facet_grid(c('dim','name'), scales = "free",
-               labeller =as_labeller(xy.labs,
-                                     default = label_parsed))+theme(legend.position = 'top')
-
-  library(grid)
-  library(gtable)
-  gt1 <-  ggplot_gtable(ggplot_build(p1))
-  gt2 <-  ggplot_gtable(ggplot_build(p2))
-  gt1$grobs[grep('strip-t.+1$', gt1$layout$name)] = gt2$grobs[grep('strip-t', gt2$layout$name)]
-
-  gt.side1 = gtable_filter(gt2, 'strip-r-1')
-  gt.side2 = gtable_filter(gt2, 'strip-r-2')
-  gt.side3 = gtable_filter(gt2, 'strip-r-3')
-
-  gt1 = gtable_add_cols(gt1, widths=gt.side1$widths[1], pos = -1)
-  gt1 = gtable_add_grob(gt1, zeroGrob(), t = 1, l = ncol(gt1), b=nrow(gt1))
-
-  panel_id <- gt1$layout[grep('panel-.+1$', gt1$layout$name),]
-  gt1 = gtable_add_grob(gt1, gt.side1, t = panel_id$t[1], l = ncol(gt1))
-  gt1 = gtable_add_grob(gt1, gt.side2, t = panel_id$t[2], l = ncol(gt1))
-  gt1 = gtable_add_grob(gt1, gt.side3, t = panel_id$t[3], l = ncol(gt1))
-
-
-  gt1 <- gtable_add_cols(gt1, widths = unit(0.15, 'cm'), pos = -1)
-  grid.newpage()
-  grid.draw(gt1)
-
-}
-
-
-#' ggplot for plotting
+#' ggplot for plotting results
 #' @description
-#' `plt.res.combine()` reproduce the plots in Yang et al., (2022), Figure 4
+#' `plt.res.combine()` reproduce the plots in Yang et al., (2022), Figure 4 and Figure S2.
+#' @param x an list of class "res".
+#' @param AIPW logical. If `TRUE`, the AIPW estimator will not be plotted.
 #' @export
-plt.res.combine <- function(bias.psi0, bias.psi1,
-                            variance.psi0, variance.psi1,
-                            AIPW = T)
+plot.res <- function(x, AIPW = T)
 {
+  bias.psi0 <- x$bias.psi0; bias.psi1 <- x$bias.psi1
+  variance.psi0 <- x$variance.psi0; variance.psi1 <- x$variance.psi1
 
   bias.psi0 <- abs(bias.psi0);bias.psi1 <- abs(bias.psi1)
   mse.psi0 <- variance.psi0 + bias.psi0^2
@@ -333,9 +220,11 @@ plt.res.combine <- function(bias.psi0, bias.psi1,
 
 #' summarize the results
 #' @description
-#' `summary_res()` summarizes the simulation outputs in Yang et al., (2022), Table 1
+#' `summary.res()` summarizes the simulation outputs in Yang et al., (2022), Table 1.
+#' @param res a list of class "res", produced by data-raw/DATASET_SIM.R or data-raw/DATASET_AIPW.R.
+#' @param psi a vector of `psi`, useful for computing the bias and mean squared error.
 #' @export
-summary_res <- function(res, psi)
+summary.res <- function(res, psi)
 {
   # est
   est.mat <- do.call(rbind, lapply(res, function(x)x[[1]][c(paste0('covj.t.',2:3),
