@@ -63,7 +63,7 @@ elastic_psi011_fixed_lists <- lapply(alltlocalpar, function(tlocalpar)
   elastic_list
 })
 ```
-At last, we reproduce the summary results in Yang et al., (2022), Table 1 and the plots in Yang et al., (2022), Figure 4 as follow.
+At last, we reproduce the summary results in Yang et al., (2022), Figure S2 as follow.
 ```{r include=FALSE}
 library(dplyr)
 library(latex2exp)
