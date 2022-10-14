@@ -17,16 +17,16 @@ knitr::opts_chunk$set(
 library(ggplot2)
 library(dplyr)
 library(ElasticIntegrative)
-output_function <- function(summary.res)
+output_function <- function(x)
 {
-  bias <- (summary.res$est[c(paste0('AIPW.', 2:3),
+  bias <- (x$est[c(paste0('AIPW.', 2:3),
                      paste0('RT.', 2:3))]-1)
-  ve <- summary.res$ve[c(paste0('AIPW.', 2:3),
+  ve <- x$ve[c(paste0('AIPW.', 2:3),
                      paste0('RT.', 2:3))]
   mse <- bias**2 + ve
-  CP <- summary.res$CP[c(paste0('AIPW.', 2:3),
+  CP <- x$CP[c(paste0('AIPW.', 2:3),
                      paste0('RT.', 2:3))]
-  width <- summary.res$CI.width[c(paste0('AIPW.', 2:3),
+  width <- x$CI.width[c(paste0('AIPW.', 2:3),
                      paste0('RT.', 2:3))]
   rbind(bias = bias*100, S.D. = sqrt(ve)*1e3,
         'root-MSE' = sqrt(mse)*1e3, 'Coverage rate' = CP*1e2,
@@ -94,11 +94,12 @@ ggplot(data = data.frame(ps.mat),
 
 The simulation results (Yang et al., (2022), Table S2) for comparing RT.AIPW and RT.SES are the following:
 ```{r echo=FALSE}
-summary.res.l1 <- summary_res(elastic_aipw_ses_l1_list,
+# check data-raw/DATASET_AIPW.R for details of data generation
+summary.res.l1 <- summary(elastic_aipw_ses_l1_list,
                                    psi = c(0,1,1))
-summary.res.l2 <- summary_res(elastic_aipw_ses_l2_list,
+summary.res.l2 <- summary(elastic_aipw_ses_l2_list,
                                    psi = c(0,1,1))
-summary.res.l3 <- summary_res(elastic_aipw_ses_l3_list,
+summary.res.l3 <- summary(elastic_aipw_ses_l3_list,
                                    psi = c(0,1,1))
 # summarize the results
 tab.l1 <- output_function(summary.res.l1)

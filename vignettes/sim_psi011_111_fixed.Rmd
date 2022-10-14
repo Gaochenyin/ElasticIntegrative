@@ -12,12 +12,12 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-library(ElasticIntegrative)
 ```
 In this vignette, we will assess the performance of the elastic combining estimator with a fixed threshold $c_\gamma$. All data generating distributions are the same as in [here](sim_psi011_111.html). The following code reproduces the simulation studies in Yang et al., (2022), Section S4.5 and the plot in Figure S2.
 ```{r include=FALSE}
+library(ElasticIntegrative)
 m <- 2000 # size for RWE
-niter <- 2000 # number of replication
+niter <- 500 # number of replication
 thres.psi  <-  sqrt(log(m)) # threshold for ACI psi
 alltlocalpar <- c(2,1,round((seq(0.8,0,length.out=8)),2))
 ```
@@ -40,6 +40,7 @@ elastic_psi000_fixed_lists <- lapply(alltlocalpar, function(tlocalpar)
                fixed = TRUE # adaptive selection strategy
                )
   })
+  class(elastic_list) <- 'res'
   elastic_list
 })
 # psi = c(0, 1, 1)
@@ -60,6 +61,7 @@ elastic_psi011_fixed_lists <- lapply(alltlocalpar, function(tlocalpar)
                fixed = TRUE # adaptive selection strategy
                )
   })
+  class(elastic_list) <- 'res'
   elastic_list
 })
 ```
@@ -74,7 +76,7 @@ library(tidyr)
 psi <- c(0, 0, 0)
 sim_results_psi00_fixed <-
   sapply(elastic_psi000_fixed_lists,
-         function(res)summary_res(res, psi = psi))
+         function(res)summary(res, psi = psi))
 est.mat.psi00.fixed <- do.call(rbind, sim_results_psi00_fixed[1,])
 ve.mat.psi00.fixed <- do.call(rbind, sim_results_psi00_fixed[2,])
 row.names(est.mat.psi00.fixed) <- row.names(ve.mat.psi00.fixed) <- 
@@ -85,7 +87,7 @@ variance.psi0.fixed <- ve.mat.psi00.fixed
 # tabulate the results for psi 011
 psi <- c(0, 1, 1)
 sim_results_psi11_fixed <-
-  sapply(elastic_psi011_fixed_lists, function(res)summary_res(res, psi = psi))
+  sapply(elastic_psi011_fixed_lists, function(res)summary(res, psi = psi))
 est.mat.psi11.fixed <- do.call(rbind, sim_results_psi11_fixed[1,])
 ve.mat.psi11.fixed <- do.call(rbind, sim_results_psi11_fixed[2,])
 row.names(est.mat.psi11.fixed) <- row.names(ve.mat.psi11.fixed) <- 
@@ -94,7 +96,9 @@ bias.psi1.fixed <- est.mat.psi11.fixed-1
 variance.psi1.fixed <- ve.mat.psi11.fixed
 ```
 ```{r echo=FALSE, fig.height=5, fig.width=6.5, fig.align = 'center'}
+outputs <- list(bias.psi0 = bias.psi0.fixed, bias.psi1 = bias.psi1.fixed,
+                variance.psi0 = variance.psi0.fixed, variance.psi1 = variance.psi1.fixed)
+class(outputs) <- 'res'
 # plot the bias, variance and mean squared error
-plt.res.combine(bias.psi0.fixed,  bias.psi1.fixed,
-                variance.psi0.fixed, variance.psi1.fixed, AIPW = F)
+plot(x = outputs, AIPW = F)
 ```

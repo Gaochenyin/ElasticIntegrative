@@ -41,6 +41,7 @@ elastic_psi000_lists <- lapply(alltlocalpar, function(tlocalpar)
                fixed = FALSE # adaptive selection strategy
                )
   })
+  class(elastic_list) <- 'res' # overload
   elastic_list
 })
 # psi = c(0, 1, 1)
@@ -61,6 +62,7 @@ elastic_psi011_lists <- lapply(alltlocalpar, function(tlocalpar)
                fixed = FALSE # adaptive selection strategy
                )
   })
+  class(elastic_list) <- 'res'
   elastic_list
 })
 ```
@@ -74,7 +76,7 @@ library(tidyr)
 # tabulate the results for psi 000
 psi <- c(0, 0, 0)
 sim_results_psi00 <-
-  sapply(elastic_psi000_lists, function(res)summary_res(res, psi = psi))
+  sapply(elastic_psi000_lists, function(res)summary(res, psi = psi))
 est.mat.psi00 <- do.call(rbind, sim_results_psi00[1,])
 ve.mat.psi00 <- do.call(rbind, sim_results_psi00[2,])
 CI.width.mat.psi00 <- do.call(rbind, sim_results_psi00[3,])
@@ -87,7 +89,7 @@ variance.psi0 <- ve.mat.psi00
 # tabulate the results for psi 011
 psi <- c(0, 1, 1)
 sim_results_psi11 <-
-  sapply(elastic_psi011_lists, function(res)summary_res(res, psi = psi))
+  sapply(elastic_psi011_lists, function(res)summary(res, psi = psi))
 est.mat.psi11 <- do.call(rbind, sim_results_psi11[1,])
 ve.mat.psi11 <- do.call(rbind, sim_results_psi11[2,])
 CI.width.mat.psi11 <- do.call(rbind, sim_results_psi11[3,])
@@ -135,6 +137,8 @@ knitr::kable(CI.width.mat.psi11*1000,
 
 ```{r echo=FALSE, fig.height=5, fig.width=6.5, fig.align = 'center'}
 # plot the bias, variance and mean squared error
-plt.res.combine(bias.psi0,  bias.psi1,
-                variance.psi0, variance.psi1, AIPW = F)
+outputs <- list(bias.psi0 = bias.psi0, bias.psi1 = bias.psi1,
+                variance.psi0 = variance.psi0, variance.psi1 = variance.psi1)
+class(outputs) <- 'res'
+plot(x = outputs, AIPW = F)
 ```
