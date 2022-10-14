@@ -15,11 +15,11 @@ real-world evidence study from [Yang et al.,
 
 Two datasets
 
--   The randomized trial contains observations on (A,X,Y), where the
-    treatment assignment A is randomized.
+- The randomized trial contains observations on (A,X,Y), where the
+  treatment assignment A is randomized.
 
--   The real-world evidence study contains observations on (A,X,Y),
-    where the treatment assignment A may be confounded.
+- The real-world evidence study contains observations on (A,X,Y), where
+  the treatment assignment A may be confounded.
 
 ## Installation with `devtools`:
 
@@ -141,9 +141,9 @@ result.elastic <- elasticHTE(dat.t = dat.t,
     #> opt.ee(ml).1 -0.1332312 0.1673369
     #> opt.ee(ml).2  0.9043746 1.1678553
     #> opt.ee(ml).3  0.8883329 1.1183534
-    #> elas.v2.1    -0.1817016 0.1258570
-    #> elas.v2.2     0.7924430 1.0538978
-    #> elas.v2.3     0.8621319 1.0799019
+    #> elas.v1.1    -0.1817016 0.1258570
+    #> elas.v1.2     0.7924430 1.0538978
+    #> elas.v1.3     0.8621319 1.0799019
 
 ## More examples
 

@@ -144,11 +144,11 @@ cat('CI')
 cbind(lower = result.elastic$CIs.inf[c(paste0('covj.t.',1:3),
                                        paste0('ee.rt(ml).',1:3),
                                        paste0('opt.ee(ml).',1:3),
-                                       paste0('elas.v2.',1:3))],
+                                       paste0('elas.v1.',1:3))],
       upper = result.elastic$CIs.sup[c(paste0('covj.t.',1:3),
                                        paste0('ee.rt(ml).',1:3),
                      paste0('opt.ee(ml).',1:3),
-                     paste0('elas.v2.',1:3))])
+                     paste0('elas.v1.',1:3))])
 ```
 
 ## More examples
