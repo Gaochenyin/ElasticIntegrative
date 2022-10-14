@@ -20,6 +20,7 @@ elastic_psi011_lists <- lapply(alltlocalpar, function(tlocalpar){
                fixed = FALSE # adaptive selection strategy
     )
   })
+  class(elastic_list) <- 'res'
   elastic_list
 })
 
@@ -39,6 +40,7 @@ elastic_psi000_lists <- lapply(alltlocalpar, function(tlocalpar){
                fixed = FALSE # adaptive selection strategy
     )
   })
+  class(elastic_list) <- 'res'
   elastic_list
 })
 
@@ -59,6 +61,7 @@ elastic_psi011_fixed_lists <- lapply(alltlocalpar, function(tlocalpar){
                fixed = TRUE # adaptive selection strategy
     )
   })
+  class(elastic_list) <- 'res'
   elastic_list
 })
 
@@ -78,6 +81,7 @@ elastic_psi000_fixed_lists <- lapply(alltlocalpar, function(tlocalpar){
                fixed = TRUE # adaptive selection strategy
     )
   })
+  class(elastic_list) <- 'res'
   elastic_list
 })
 

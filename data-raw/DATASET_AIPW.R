@@ -20,6 +20,7 @@ elastic_aipw_ses_l1_list <- lapply(alltlocalpar, function(tlocalpar){
                fixed = FALSE # adaptive selection strategy
     )
   })
+  class(elastic_list) <- 'res'
   elastic_list
 })
 
@@ -39,6 +40,7 @@ elastic_aipw_ses_l2_list <- lapply(alltlocalpar, function(tlocalpar){
                fixed = FALSE # adaptive selection strategy
     )
   })
+  class(elastic_list) <- 'res'
   elastic_list
 })
 
@@ -58,6 +60,7 @@ elastic_aipw_ses_l3_list <- lapply(alltlocalpar, function(tlocalpar){
                fixed = FALSE # adaptive selection strategy
     )
   })
+  class(elastic_list) <- 'res'
   elastic_list
 })
 
