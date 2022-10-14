@@ -12,5 +12,5 @@
 \item{psi}{a vector of \code{psi}, useful for computing the bias and mean squared error.}
 }
 \description{
-\code{summary.res()} summarizes the simulation outputs in Yang et al., (2022), Table 1
+\code{summary.res()} summarizes the simulation outputs in Yang et al., (2022), Table 1.
 }

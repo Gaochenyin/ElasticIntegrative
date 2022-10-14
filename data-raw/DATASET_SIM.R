@@ -8,12 +8,11 @@ elastic_psi011_lists <- lapply(alltlocalpar, function(tlocalpar){
   elastic_list <- sapply(1:niter, function(seed)
   {
     Data.list <- GenData(beta0 = c(0, 1, 1, 1), # for the mu0 function
-                              psi0 = c(0, 1, 1), # for the contrast function
-                              om.id = 0, es.id = 0,
-                              n = 1e5, mean.x = 1,  # setup for the finite population
-                              n.t = NULL, # for the RCT, use the default sample size
-                              m = m, tlocalpar = tlocalpar, # for the RWE
-                              seed = seed)
+                         psi0 = c(0, 1, 1), # for the contrast function
+                         n = 1e5, mean.x = 1,  # setup for the finite population
+                         n.t = NULL, # for the RCT, use the default sample size
+                         m = m, tlocalpar = tlocalpar, # for the RWE
+                         seed = seed)
     elasticHTE(Data.list$RT, # RCT
                Data.list$RW, # RWE
                thres.psi = thres.psi,
@@ -29,7 +28,6 @@ elastic_psi000_lists <- lapply(alltlocalpar, function(tlocalpar){
   {
     Data.list <- GenerateData(beta0 = c(0, 1, 1, 1), # for the mu0 function
                               psi0 = c(0, 0, 0), # for the contrast function
-                              om.id = 0, es.id = 0,
                               n = 1e5, mean.x = 1,  # setup for the finite population
                               n.t = NULL, # for the RCT, use the default sample size
                               m = m, tlocalpar = tlocalpar, # for the RWE
@@ -50,7 +48,6 @@ elastic_psi011_fixed_lists <- lapply(alltlocalpar, function(tlocalpar){
   {
     Data.list <- GenerateData(beta0 = c(0, 1, 1, 1), # for the mu0 function
                               psi0 = c(0, 1, 1), # for the contrast function
-                              om.id = 0, es.id = 0,
                               n = 1e5, mean.x = 1,  # setup for the finite population
                               n.t = NULL, # for the RCT, use the default sample size
                               m = m, tlocalpar = tlocalpar, # for the RWE
@@ -70,7 +67,6 @@ elastic_psi000_fixed_lists <- lapply(alltlocalpar, function(tlocalpar){
   {
     Data.list <- GenerateData(beta0 = c(0, 1, 1, 1), # for the mu0 function
                               psi0 = c(0, 0, 0), # for the contrast function
-                              om.id = 0, es.id = 0,
                               n = 1e5, mean.x = 1,  # setup for the finite population
                               n.t = NULL, # for the RCT, use the default sample size
                               m = m, tlocalpar = tlocalpar, # for the RWE

@@ -12,5 +12,5 @@
 \item{AIPW}{logical. If \code{TRUE}, the AIPW estimator will not be plotted.}
 }
 \description{
-\code{plt.res.combine()} reproduce the plots in Yang et al., (2022), Figure 4
+\code{plt.res.combine()} reproduce the plots in Yang et al., (2022), Figure 4 and Figure S2.
 }
