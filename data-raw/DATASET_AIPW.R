@@ -5,7 +5,7 @@ thres.psi  <-  sqrt(log(m)) # threshold for ECI psi
 alltlocalpar <-round((seq(2,0,length.out=10)),2)
 
 elastic_aipw_ses_l1_list <- lapply(alltlocalpar, function(tlocalpar){
-  elastic_list <- sapply(1:niter, function(seed)
+  elastic_list <- lapply(1:niter, function(seed)
   {
     Data.list <- GenData(beta0 = c(0, 1, 1, 1), # for the mu0 function
                          psi0 = c(0, 1, 1), # for the contrast function
@@ -24,7 +24,7 @@ elastic_aipw_ses_l1_list <- lapply(alltlocalpar, function(tlocalpar){
 })
 
 elastic_aipw_ses_l2_list <- lapply(alltlocalpar, function(tlocalpar){
-  elastic_list <- sapply(1:niter, function(seed)
+  elastic_list <- lapply(1:niter, function(seed)
   {
     Data.list <- GenData(beta0 = c(0, 1, 1, 1), # for the mu0 function
                          psi0 = c(0, 1, 1), # for the contrast function
@@ -43,7 +43,7 @@ elastic_aipw_ses_l2_list <- lapply(alltlocalpar, function(tlocalpar){
 })
 
 elastic_aipw_ses_l3_list <- lapply(alltlocalpar, function(tlocalpar){
-  elastic_list <- sapply(1:niter, function(seed)
+  elastic_list <- lapply(1:niter, function(seed)
   {
     Data.list <- GenData(beta0 = c(0, 1, 1, 1), # for the mu0 function
                          psi0 = c(0, 1, 1), # for the contrast function

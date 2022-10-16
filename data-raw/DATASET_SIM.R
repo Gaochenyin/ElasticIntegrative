@@ -26,7 +26,7 @@ elastic_psi011_lists <- lapply(alltlocalpar, function(tlocalpar){
 elastic_psi000_lists <- lapply(alltlocalpar, function(tlocalpar){
   elastic_list <- sapply(1:niter, function(seed)
   {
-    Data.list <- GenerateData(beta0 = c(0, 1, 1, 1), # for the mu0 function
+    Data.list <- GenData(beta0 = c(0, 1, 1, 1), # for the mu0 function
                               psi0 = c(0, 0, 0), # for the contrast function
                               n = 1e5, mean.x = 1,  # setup for the finite population
                               n.t = NULL, # for the RCT, use the default sample size
@@ -46,7 +46,7 @@ elastic_psi000_lists <- lapply(alltlocalpar, function(tlocalpar){
 elastic_psi011_fixed_lists <- lapply(alltlocalpar, function(tlocalpar){
   elastic_list <- sapply(1:niter, function(seed)
   {
-    Data.list <- GenerateData(beta0 = c(0, 1, 1, 1), # for the mu0 function
+    Data.list <- GeneData(beta0 = c(0, 1, 1, 1), # for the mu0 function
                               psi0 = c(0, 1, 1), # for the contrast function
                               n = 1e5, mean.x = 1,  # setup for the finite population
                               n.t = NULL, # for the RCT, use the default sample size
@@ -65,7 +65,7 @@ elastic_psi011_fixed_lists <- lapply(alltlocalpar, function(tlocalpar){
 elastic_psi000_fixed_lists <- lapply(alltlocalpar, function(tlocalpar){
   elastic_list <- sapply(1:niter, function(seed)
   {
-    Data.list <- GenerateData(beta0 = c(0, 1, 1, 1), # for the mu0 function
+    Data.list <- GenData(beta0 = c(0, 1, 1, 1), # for the mu0 function
                               psi0 = c(0, 0, 0), # for the contrast function
                               n = 1e5, mean.x = 1,  # setup for the finite population
                               n.t = NULL, # for the RCT, use the default sample size
