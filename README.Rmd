@@ -155,6 +155,6 @@ cbind(lower = result.elastic$CIs.inf[c(paste0('covj.t.',1:3),
 ```{r eval=FALSE, include=TRUE}
 browseVignettes("ElasticIntegrative")
 ```
-* [Simulation: adaptive selection](ElasticIntegrative/doc/sim_psi011_111.html)
-* [Simulation: comparing AIPW and SES](ElasticIntegrative/doc/sim_AIPWvsSES.html)
-* [Simulation: fixed threshold](ElasticIntegrative/doc/sim_psi011_111_fixed.html)
+* [Simulation: adaptive selection](doc/sim_psi011_111.html)
+* [Simulation: comparing AIPW and SES](doc/sim_AIPWvsSES.html)
+* [Simulation: fixed threshold](doc/sim_psi011_111_fixed.html)
