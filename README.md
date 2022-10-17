@@ -151,6 +151,9 @@ result.elastic <- elasticHTE(dat.t = dat.t,
 browseVignettes("ElasticIntegrative")
 ```
 
-- [Simulation: adaptive selection](doc/sim_psi011_111.html)
-- [Simulation: comparing AIPW and SES](doc/sim_AIPWvsSES.html)
-- [Simulation: fixed threshold](doc/sim_psi011_111_fixed.html)
+- [Simulation: adaptive
+  selection](https://gaochenyin.github.io/ElasticIntegrative/doc/sim_psi011_111)
+- [Simulation: comparing AIPW and
+  SES](https://gaochenyin.github.io/ElasticIntegrative/doc/sim_AIPWvsSES)
+- [Simulation: fixed
+  threshold](https://gaochenyin.github.io/ElasticIntegrative/doc/sim_psi011_111_fixed)
