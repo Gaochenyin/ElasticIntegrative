@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Simulation example: comparing AIPW and SES</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+<script>$(document).ready(function(){
+    if (typeof $('[data-toggle="tooltip"]').tooltip === 'function') {
+        $('[data-toggle="tooltip"]').tooltip();
+    }
+    if ($('[data-toggle="popover"]').popover === 'function') {
+        $('[data-toggle="popover"]').popover();
+    }
+});
+</script>
+<style type="text/css">
+.lightable-minimal {
+border-collapse: separate;
+border-spacing: 16px 1px;
+width: 100%;
+margin-bottom: 10px;
+}
+.lightable-minimal td {
+margin-left: 5px;
+margin-right: 5px;
+}
+.lightable-minimal th {
+margin-left: 5px;
+margin-right: 5px;
+}
+.lightable-minimal thead tr:last-child th {
+border-bottom: 2px solid #00000050;
+empty-cells: hide;
+}
+.lightable-minimal tbody tr:first-child td {
+padding-top: 0.5em;
+}
+.lightable-minimal.lightable-hover tbody tr:hover {
+background-color: #f5f5f5;
+}
+.lightable-minimal.lightable-striped tbody tr:nth-child(even) {
+background-color: #f5f5f5;
+}
+.lightable-classic {
+border-top: 0.16em solid #111111;
+border-bottom: 0.16em solid #111111;
+width: 100%;
+margin-bottom: 10px;
+margin: 10px 5px;
+}
+.lightable-classic tfoot tr td {
+border: 0;
+}
+.lightable-classic tfoot tr:first-child td {
+border-top: 0.14em solid #111111;
+}
+.lightable-classic caption {
+color: #222222;
+}
+.lightable-classic td {
+padding-left: 5px;
+padding-right: 5px;
+color: #222222;
+}
+.lightable-classic th {
+padding-left: 5px;
+padding-right: 5px;
+font-weight: normal;
+color: #222222;
+}
+.lightable-classic thead tr:last-child th {
+border-bottom: 0.10em solid #111111;
+}
+.lightable-classic.lightable-hover tbody tr:hover {
+background-color: #F9EEC1;
+}
+.lightable-classic.lightable-striped tbody tr:nth-child(even) {
+background-color: #f5f5f5;
+}
+.lightable-classic-2 {
+border-top: 3px double #111111;
+border-bottom: 3px double #111111;
+width: 100%;
+margin-bottom: 10px;
+}
+.lightable-classic-2 tfoot tr td {
+border: 0;
+}
+.lightable-classic-2 tfoot tr:first-child td {
+border-top: 3px double #111111;
+}
+.lightable-classic-2 caption {
+color: #222222;
+}
+.lightable-classic-2 td {
+padding-left: 5px;
+padding-right: 5px;
+color: #222222;
+}
+.lightable-classic-2 th {
+padding-left: 5px;
+padding-right: 5px;
+font-weight: normal;
+color: #222222;
+}
+.lightable-classic-2 tbody tr:last-child td {
+border-bottom: 3px double #111111;
+}
+.lightable-classic-2 thead tr:last-child th {
+border-bottom: 1px solid #111111;
+}
+.lightable-classic-2.lightable-hover tbody tr:hover {
+background-color: #F9EEC1;
+}
+.lightable-classic-2.lightable-striped tbody tr:nth-child(even) {
+background-color: #f5f5f5;
+}
+.lightable-material {
+min-width: 100%;
+white-space: nowrap;
+table-layout: fixed;
+font-family: Roboto, sans-serif;
+border: 1px solid #EEE;
+border-collapse: collapse;
+margin-bottom: 10px;
+}
+.lightable-material tfoot tr td {
+border: 0;
+}
+.lightable-material tfoot tr:first-child td {
+border-top: 1px solid #EEE;
+}
+.lightable-material th {
+height: 56px;
+padding-left: 16px;
+padding-right: 16px;
+}
+.lightable-material td {
+height: 52px;
+padding-left: 16px;
+padding-right: 16px;
+border-top: 1px solid #eeeeee;
+}
+.lightable-material.lightable-hover tbody tr:hover {
+background-color: #f5f5f5;
+}
+.lightable-material.lightable-striped tbody tr:nth-child(even) {
+background-color: #f5f5f5;
+}
+.lightable-material.lightable-striped tbody td {
+border: 0;
+}
+.lightable-material.lightable-striped thead tr:last-child th {
+border-bottom: 1px solid #ddd;
+}
+.lightable-material-dark {
+min-width: 100%;
+white-space: nowrap;
+table-layout: fixed;
+font-family: Roboto, sans-serif;
+border: 1px solid #FFFFFF12;
+border-collapse: collapse;
+margin-bottom: 10px;
+background-color: #363640;
+}
+.lightable-material-dark tfoot tr td {
+border: 0;
+}
+.lightable-material-dark tfoot tr:first-child td {
+border-top: 1px solid #FFFFFF12;
+}
+.lightable-material-dark th {
+height: 56px;
+padding-left: 16px;
+padding-right: 16px;
+color: #FFFFFF60;
+}
+.lightable-material-dark td {
+height: 52px;
+padding-left: 16px;
+padding-right: 16px;
+color: #FFFFFF;
+border-top: 1px solid #FFFFFF12;
+}
+.lightable-material-dark.lightable-hover tbody tr:hover {
+background-color: #FFFFFF12;
+}
+.lightable-material-dark.lightable-striped tbody tr:nth-child(even) {
+background-color: #FFFFFF12;
+}
+.lightable-material-dark.lightable-striped tbody td {
+border: 0;
+}
+.lightable-material-dark.lightable-striped thead tr:last-child th {
+border-bottom: 1px solid #FFFFFF12;
+}
+.lightable-paper {
+width: 100%;
+margin-bottom: 10px;
+color: #444;
+}
+.lightable-paper tfoot tr td {
+border: 0;
+}
+.lightable-paper tfoot tr:first-child td {
+border-top: 1px solid #00000020;
+}
+.lightable-paper thead tr:last-child th {
+color: #666;
+vertical-align: bottom;
+border-bottom: 1px solid #00000020;
+line-height: 1.15em;
+padding: 10px 5px;
+}
+.lightable-paper td {
+vertical-align: middle;
+border-bottom: 1px solid #00000010;
+line-height: 1.15em;
+padding: 7px 5px;
+}
+.lightable-paper.lightable-hover tbody tr:hover {
+background-color: #F9EEC1;
+}
+.lightable-paper.lightable-striped tbody tr:nth-child(even) {
+background-color: #00000008;
+}
+.lightable-paper.lightable-striped tbody td {
+border: 0;
+}
+</style>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Simulation example: comparing AIPW and
+SES</h1>
+
+
+
+<p>In this vignette, we will compare the performances of the
+AIPW-adjusted approach and the SES approach based on RT data (Yang et
+al., (2022), Section S4.1). The data generating mechanism is the same as
+in <a href="sim_psi011_111.html">here</a> except that we now consider
+different propensity score distributions.</p>
+<ul>
+<li><p>(weak separation of propensity score distributions by treatment
+group) <span class="math inline">\(\alpha =
+(-2,-1,-1)\)</span>.</p></li>
+<li><p>(median separation of propensity score distributions by treatment
+group) <span class="math inline">\(\alpha =
+(-2,-2,-2)\)</span>.</p></li>
+<li><p>(strong separation of propensity score distributions by treatment
+group) <span class="math inline">\(\alpha =
+(-2,-3,-3)\)</span>.</p></li>
+</ul>
+<p>The following figure shows the propensity score distributions by
+treatment group and demonstrates the degrees of separation in the three
+scenarios.
+<img src="data:image/png;base64,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" style="display: block; margin: auto;" /></p>
+The simulation results (Yang et al., (2022), Table S2) for comparing
+RT.AIPW and RT.SES are the following:
+<table class="table" style="width: auto !important; float: left; margin-right: 10px;">
+<caption>
+Case 1: weak separation
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+AIPW.2
+</th>
+<th style="text-align:right;">
+AIPW.3
+</th>
+<th style="text-align:right;">
+RT.2
+</th>
+<th style="text-align:right;">
+RT.3
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+bias
+</td>
+<td style="text-align:right;">
+-1.4
+</td>
+<td style="text-align:right;">
+-2.3
+</td>
+<td style="text-align:right;">
+-0.5
+</td>
+<td style="text-align:right;">
+-0.9
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S.D.
+</td>
+<td style="text-align:right;">
+241.8
+</td>
+<td style="text-align:right;">
+248.2
+</td>
+<td style="text-align:right;">
+180.1
+</td>
+<td style="text-align:right;">
+185.6
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+root-MSE
+</td>
+<td style="text-align:right;">
+242.2
+</td>
+<td style="text-align:right;">
+249.3
+</td>
+<td style="text-align:right;">
+180.2
+</td>
+<td style="text-align:right;">
+185.8
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Coverage rate
+</td>
+<td style="text-align:right;">
+94.4
+</td>
+<td style="text-align:right;">
+91.8
+</td>
+<td style="text-align:right;">
+95.4
+</td>
+<td style="text-align:right;">
+93.2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+width
+</td>
+<td style="text-align:right;">
+955.1
+</td>
+<td style="text-align:right;">
+941.7
+</td>
+<td style="text-align:right;">
+709.3
+</td>
+<td style="text-align:right;">
+709.9
+</td>
+</tr>
+</tbody>
+</table>
+<table class="table" style="width: auto !important; float: left; margin-right: 10px;">
+<caption>
+Case 2: median separation
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+AIPW.2
+</th>
+<th style="text-align:right;">
+AIPW.3
+</th>
+<th style="text-align:right;">
+RT.2
+</th>
+<th style="text-align:right;">
+RT.3
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+bias
+</td>
+<td style="text-align:right;">
+1.3
+</td>
+<td style="text-align:right;">
+-0.7
+</td>
+<td style="text-align:right;">
+0.4
+</td>
+<td style="text-align:right;">
+-1.2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S.D.
+</td>
+<td style="text-align:right;">
+364.8
+</td>
+<td style="text-align:right;">
+380.5
+</td>
+<td style="text-align:right;">
+259.6
+</td>
+<td style="text-align:right;">
+249.3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+root-MSE
+</td>
+<td style="text-align:right;">
+365.0
+</td>
+<td style="text-align:right;">
+380.6
+</td>
+<td style="text-align:right;">
+259.6
+</td>
+<td style="text-align:right;">
+249.6
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Coverage rate
+</td>
+<td style="text-align:right;">
+92.8
+</td>
+<td style="text-align:right;">
+93.2
+</td>
+<td style="text-align:right;">
+94.6
+</td>
+<td style="text-align:right;">
+94.6
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+width
+</td>
+<td style="text-align:right;">
+1389.5
+</td>
+<td style="text-align:right;">
+1420.0
+</td>
+<td style="text-align:right;">
+974.1
+</td>
+<td style="text-align:right;">
+970.7
+</td>
+</tr>
+</tbody>
+</table>
+<table class="table" style="width: auto !important; float: left; margin-right: 10px;">
+<caption>
+Case 3: strong separation
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+AIPW.2
+</th>
+<th style="text-align:right;">
+AIPW.3
+</th>
+<th style="text-align:right;">
+RT.2
+</th>
+<th style="text-align:right;">
+RT.3
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+bias
+</td>
+<td style="text-align:right;">
+2.7
+</td>
+<td style="text-align:right;">
+0.5
+</td>
+<td style="text-align:right;">
+-1.5
+</td>
+<td style="text-align:right;">
+-2.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S.D.
+</td>
+<td style="text-align:right;">
+622.2
+</td>
+<td style="text-align:right;">
+554.9
+</td>
+<td style="text-align:right;">
+393.9
+</td>
+<td style="text-align:right;">
+396.7
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+root-MSE
+</td>
+<td style="text-align:right;">
+622.7
+</td>
+<td style="text-align:right;">
+554.9
+</td>
+<td style="text-align:right;">
+394.2
+</td>
+<td style="text-align:right;">
+397.2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Coverage rate
+</td>
+<td style="text-align:right;">
+91.0
+</td>
+<td style="text-align:right;">
+92.0
+</td>
+<td style="text-align:right;">
+93.2
+</td>
+<td style="text-align:right;">
+91.6
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+width
+</td>
+<td style="text-align:right;">
+14568.9
+</td>
+<td style="text-align:right;">
+5076.9
+</td>
+<td style="text-align:right;">
+1448.0
+</td>
+<td style="text-align:right;">
+1447.9
+</td>
+</tr>
+</tbody>
+</table>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

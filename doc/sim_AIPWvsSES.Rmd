@@ -1,0 +1,118 @@
+---
+title: "Simulation example: comparing AIPW and SES"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Simulation example: comparing AIPW and SES}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+```{r, include = FALSE}
+library(ggplot2)
+library(dplyr)
+library(ElasticIntegrative)
+output_function <- function(x)
+{
+  bias <- (x$est[c(paste0('AIPW.', 2:3),
+                     paste0('RT.', 2:3))]-1)
+  ve <- x$ve[c(paste0('AIPW.', 2:3),
+                     paste0('RT.', 2:3))]
+  mse <- bias**2 + ve
+  CP <- x$CP[c(paste0('AIPW.', 2:3),
+                     paste0('RT.', 2:3))]
+  width <- x$CI.width[c(paste0('AIPW.', 2:3),
+                     paste0('RT.', 2:3))]
+  rbind(bias = bias*100, S.D. = sqrt(ve)*1e3,
+        'root-MSE' = sqrt(mse)*1e3, 'Coverage rate' = CP*1e2,
+        width = width*1e3)
+}
+```
+In this vignette, we will compare the performances of the AIPW-adjusted approach and the SES approach based on RT data (Yang et al., (2022), Section S4.1). The data generating mechanism is the same as in [here](sim_psi011_111.html) except
+that we now consider different propensity score distributions. 
+
+* (weak separation of propensity score distributions by treatment group) $\alpha = (-2,-1,-1)$.
+
+* (median separation of propensity score distributions by treatment group) $\alpha = (-2,-2,-2)$.
+
+* (strong separation of propensity score distributions by treatment group) $\alpha = (-2,-3,-3)$.
+
+The following figure shows the propensity score distributions by treatment group and demonstrates the degrees of separation in the three scenarios. 
+```{r ps_dist, echo = TRUE, echo=FALSE, fig.height=5, fig.width=6.5, fig.align = 'center'}
+# treatment plot
+set.seed(1)
+mean.x <- 1;n <- 1e5
+# change mean to 1; intercept
+X1 <- rnorm(n, mean.x, 1); X2 <- rnorm(n, mean.x, 1);
+f.X <- cbind(X1, X2)
+# true ATE
+eS <- exp(-4.5 -2 * X1 -2 *  X2)/{1+exp(-4.5 -2 * X1 -2 *  X2)}
+S <- sapply(eS,rbinom,n = 1, size = 1)
+S.ind <- which(S==1)
+X.t <- f.X[S.ind,]
+n.t <- length(S.ind)
+# need to change to produce for weight = -2
+ps.t.1 <- exp(-2+X.t%*%c(-1,-1))/{1+exp(-2+X.t%*%c(-1,-1))}
+ps.t.2 <- exp(-2+X.t%*%c(-2,-2))/{1+exp(-2+X.t%*%c(-2,-2))}
+ps.t.3 <- exp(-2+X.t%*%c(-3,-3))/{1+exp(-2+X.t%*%c(-3,-3))}
+A.t.1  <- rbinom(n.t,1,ps.t.1)
+A.t.2  <- rbinom(n.t,1,ps.t.2)
+A.t.3  <- rbinom(n.t,1,ps.t.3)
+
+ps.mat <- cbind(c(ps.t.1, ps.t.2, ps.t.3),
+      c(A.t.1, A.t.2, A.t.3),
+      c(rep(1, n.t),
+        rep(2, n.t),
+        rep(3, n.t)))
+
+xy.labs <- c('Weak',
+             'Median',
+             'Strong')
+names(xy.labs) <- 1:3
+
+ggplot(data = data.frame(ps.mat),
+       aes(x = X1, fill = as.factor(X2)))+
+  geom_density(alpha = 0.5)+
+  facet_wrap(~X3, scales = "free",
+             labeller =as_labeller(xy.labs))+
+  theme(legend.position = 'top')+
+  theme(axis.text = element_text(size = 10),
+        text = element_text(size = 12),
+        legend.text=element_text(size=12))+
+  theme(plot.margin=unit(c(0.3,0.3,0,0),"cm"),
+        panel.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.line = element_line(colour = "black"))+
+  scale_fill_discrete(name = 'A')+xlab('')
+```
+
+The simulation results (Yang et al., (2022), Table S2) for comparing RT.AIPW and RT.SES are the following:
+```{r echo=FALSE}
+# check data-raw/DATASET_AIPW.R for details of data generation
+summary.res.l1 <- summary(elastic_aipw_ses_l1_list,
+                                   psi = c(0,1,1))
+summary.res.l2 <- summary(elastic_aipw_ses_l2_list,
+                                   psi = c(0,1,1))
+summary.res.l3 <- summary(elastic_aipw_ses_l3_list,
+                                   psi = c(0,1,1))
+# summarize the results
+tab.l1 <- output_function(summary.res.l1)
+tab.l2 <- output_function(summary.res.l2)
+tab.l3 <- output_function(summary.res.l3)
+# output
+knitr::kable(tab.l1, digits = 1,
+             caption = 'Case 1: weak separation')%>%
+  kableExtra::kable_styling(full_width = FALSE, position = "float_left")
+knitr::kable(tab.l2, digits = 1,
+             caption = 'Case 2: median separation')%>%
+  kableExtra::kable_styling(full_width = FALSE, position = "float_left")
+knitr::kable(tab.l3, digits = 1,
+             caption = 'Case 3: strong separation')%>%
+  kableExtra::kable_styling(full_width = FALSE, position = "float_left")
+```
