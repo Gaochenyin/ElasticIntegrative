@@ -4,12 +4,18 @@
 \alias{elasticHTE}
 \title{Elastic integrative analysis for heterogenous treatment effect}
 \usage{
-elasticHTE(dat.t, dat.os, thres.psi = sqrt(log(m)), fixed = FALSE)
+elasticHTE(
+  dat.t,
+  dat.os,
+  thres.psi = sqrt(log(m)),
+  fixed = FALSE,
+  alpha = c(0, 0, 0)
+)
 }
 \arguments{
 \item{dat.t}{A list contains X, Y and A for RCT.}
 
-\item{dat.os}{A list contains X, Y and A fro RWE.}
+\item{dat.os}{A list contains X, Y and A for RWE.}
 
 \item{thres.psi}{A numerical value indicating the threshold for constructing adaptive confidence interval.}
 
@@ -20,6 +26,8 @@ elasticHTE(dat.t, dat.os, thres.psi = sqrt(log(m)), fixed = FALSE)
 The default fixed threshold is \link{qchisq(1 -0.05, df = p)},
 in which \code{p} is the dimension of \code{X} plus one (i.e., add the intercept).
 }}
+
+\item{alpha}{a vector for estimating the linear combination of the coefficients for treatment modifiers (depreciated).}
 }
 \value{
 A list with components:
@@ -64,7 +72,7 @@ result.elastic
 # $ve: variance estimation of the psi by permutation-based estimation
 # $CIs.inf, CIs.sup: 95\% confidence intervals
   ## Wald CIs for regular estimators;
-  ## ECIs for non-regular estimators, namely elas.v1 and elas.v2
+  ## ACIs for non-regular estimators, namely elas.v1 and elas.v2
   ## elas.v1 performs better in our simulation studies.
 # $nuispar: estimates for various nuisance parameter
 }
