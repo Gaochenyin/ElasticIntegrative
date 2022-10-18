@@ -45,7 +45,7 @@ This is an example for illustration
 ```{r example}
 library(ElasticIntegrative)
 ## basic example code for data generation
-set.seed(1234)
+set.seed(2333)
 ## setups
 beta0 <- c(0, 1, 1, 1) # for the mu0 function
 psi0 <- c(0, 1, 1) # for contrast function
@@ -94,9 +94,13 @@ X.os <- f.X.os[P.ind, ]
 X.confounder.os <- X3.os[P.ind]
 Y0.os <- Y0.os[P.ind]
 Y1.os <- Y1.os[P.ind]
-# 0.058 is chosen to maintain the proportion of the treated at about .5
-eA <- exp(0.058 - 1 * X.os[, 1] + 1 * X.os[, 2] - tlocalpar * X.confounder.os)/
-  {1+exp(0.058 - 1 * X.os[, 1] + 1 * X.os[, 2] - tlocalpar * X.confounder.os)}
+# a.opt is chosen to maintain the proportion of the treated at about .5
+a.opt <- uniroot(function(a) {
+  ps <- expoit(a - 1 * X.os[, 1] + 1 * X.os[, 2] - tlocalpar * X.confounder.os)
+  mean(ps) - .5
+}, c(-100, 100))$root
+eA <- exp(a.opt - 1 * X.os[, 1] + 1 * X.os[, 2] - tlocalpar * X.confounder.os)/
+  {1+exp(a.opt - 1 * X.os[, 1] + 1 * X.os[, 2] - tlocalpar * X.confounder.os)}
 A.os <- sapply(eA, rbinom, n = 1, size = 1)
 Y.os <- Y1.os * A.os + Y0.os * (1 - A.os)
 # organize the RT and RW datasets
@@ -141,14 +145,16 @@ result.elastic$ve[c(paste0('covj.t.',1:3),
                      paste0('opt.ee(ml).',1:3),
                      paste0('elas.',1:3))]
 cat('CI')
-cbind(lower = result.elastic$CIs.inf[c(paste0('covj.t.',1:3),
+cbind(lower = c(result.elastic$CIs.inf[c(paste0('covj.t.',1:3),
                                        paste0('ee.rt(ml).',1:3),
-                                       paste0('opt.ee(ml).',1:3),
-                                       paste0('elas.v1.',1:3))],
-      upper = result.elastic$CIs.sup[c(paste0('covj.t.',1:3),
+                                       paste0('opt.ee(ml).',1:3))],
+                result.elastic$est[paste0('elas.', 1:3)] + 
+                  result.elastic$CIs.inf[paste0('elas1.', 1:3)]),
+      upper = c(result.elastic$CIs.sup[c(paste0('covj.t.',1:3),
                                        paste0('ee.rt(ml).',1:3),
-                     paste0('opt.ee(ml).',1:3),
-                     paste0('elas.v1.',1:3))])
+                                       paste0('opt.ee(ml).',1:3))],
+                result.elastic$est[paste0('elas.', 1:3)] + 
+                  result.elastic$CIs.sup[paste0('elas1.', 1:3)]))
 ```
 
 ## More examples
