@@ -85,7 +85,6 @@ elasticHTE <- function(dat.t, # RT
     # sieve method
     ## construct the ML-x variables (up to order-2)
     dat.os$ml.X.os <- poly(dat.os$X, degree = 2, raw = TRUE)
-
     glm.out.sieve <- glm(A~ml.X.os,
                          family=quasibinomial,
                          weights=q,data=dat.os)
