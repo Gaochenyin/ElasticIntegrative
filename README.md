@@ -39,7 +39,7 @@ library(ElasticIntegrative)
 ## basic example code for data generation
 set.seed(2333)
 ## setups
-beta0 <- c(0, 1, 1, 1) # for the mu0 function
+p <- 3; beta0 <- c(0, 1, 1, 1) # for the mu0 function
 psi0 <- c(0, 1, 1) # for contrast function
 n <- 1e5; mean.x <- 1 # the whole population
 m <- 2000; tlocalpar <- 0 # size and bias for the RWE

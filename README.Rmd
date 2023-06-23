@@ -47,7 +47,7 @@ library(ElasticIntegrative)
 ## basic example code for data generation
 set.seed(2333)
 ## setups
-beta0 <- c(0, 1, 1, 1) # for the mu0 function
+p <- 3; beta0 <- c(0, 1, 1, 1) # for the mu0 function
 psi0 <- c(0, 1, 1) # for contrast function
 n <- 1e5; mean.x <- 1 # the whole population
 m <- 2000; tlocalpar <- 0 # size and bias for the RWE
@@ -135,26 +135,26 @@ CI |  95% percentile bootstrap confidence intervals. Note `covj.t`, `ee.rt(ml)`,
 ```{r echo=FALSE}
 # output the results
 cat('est')
-result.elastic$est[c(paste0('covj.t.',1:3),
-                     paste0('ee.rt(ml).',1:3),
-                     paste0('opt.ee(ml).',1:3),
-                     paste0('elas.',1:3))]
+result.elastic$est[c(paste0('covj.t.',1:p),
+                     paste0('ee.rt(ml).',1:p),
+                     paste0('opt.ee(ml).',1:p),
+                     paste0('elas.',1:p))]
 cat('ve')
-result.elastic$ve[c(paste0('covj.t.',1:3),
-                    paste0('ee.rt(ml).',1:3),
-                     paste0('opt.ee(ml).',1:3),
-                     paste0('elas.',1:3))]
+result.elastic$ve[c(paste0('covj.t.',1:p),
+                    paste0('ee.rt(ml).',1:p),
+                     paste0('opt.ee(ml).',1:p),
+                     paste0('elas.',1:p))]
 cat('CI')
-cbind(lower = c(result.elastic$CIs.inf[c(paste0('covj.t.',1:3),
-                                       paste0('ee.rt(ml).',1:3),
-                                       paste0('opt.ee(ml).',1:3))],
-                result.elastic$est[paste0('elas.', 1:3)] + 
-                  result.elastic$CIs.inf[paste0('elas1.', 1:3)]),
-      upper = c(result.elastic$CIs.sup[c(paste0('covj.t.',1:3),
-                                       paste0('ee.rt(ml).',1:3),
-                                       paste0('opt.ee(ml).',1:3))],
-                result.elastic$est[paste0('elas.', 1:3)] + 
-                  result.elastic$CIs.sup[paste0('elas1.', 1:3)]))
+cbind(lower = c(result.elastic$CIs.inf[c(paste0('covj.t.',1:p),
+                                       paste0('ee.rt(ml).',1:p),
+                                       paste0('opt.ee(ml).',1:p))],
+                result.elastic$est[paste0('elas.', 1:p)] + 
+                  result.elastic$CIs.inf[paste0('elas1.', 1:p)]),
+      upper = c(result.elastic$CIs.sup[c(paste0('covj.t.',1:p),
+                                       paste0('ee.rt(ml).',1:p),
+                                       paste0('opt.ee(ml).',1:p))],
+                result.elastic$est[paste0('elas.', 1:p)] + 
+                  result.elastic$CIs.sup[paste0('elas1.', 1:p)]))
 ```
 
 ## More examples
