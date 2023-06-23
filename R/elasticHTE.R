@@ -58,7 +58,7 @@ elasticHTE <- function(dat.t, # RT
                        dat.os, # RW
                        thres.psi = sqrt(log(m)), # threshold for adaptive CI
                        fixed = FALSE, # fixed c_gamma
-                       alpha = c(0, 0, 0)
+                       alpha = rep(0, ncol(dat.t$X)+1)
                        )
 {
 
@@ -83,19 +83,15 @@ elasticHTE <- function(dat.t, # RT
                        weights=q,data=dat.os)
     dat.os$ps <- glm.out.ols$fitted.values
     # sieve method
-    ## construct the ML-x variables
-    dat.os$ml.X.os <- cbind(dat.os$X[,1],
-                            dat.os$X[,1]^2,
-                            dat.os$X[,2],
-                            dat.os$X[,2]^2,
-                            dat.os$X[,1]*dat.os$X[,2])
+    ## construct the ML-x variables (up to order-2)
+    dat.os$ml.X.os <- poly(dat.os$X, degree = 2, raw = TRUE)
 
     glm.out.sieve <- glm(A~ml.X.os,
                          family=quasibinomial,
                          weights=q,data=dat.os)
     dat.os$ml.ps <- glm.out.sieve$fitted.values
 
-    if(any(dat.t$ps!=0.5)) # if not eqaully weightted
+    if(any(dat.t$ps!=0.5)) # if not equally weighted
     {
       # OLS
       glm.out.ols <- glm(A~X,
@@ -104,11 +100,7 @@ elasticHTE <- function(dat.t, # RT
       dat.t$ps <- glm.out.ols$fitted.values
       # sieve method
       ## construct the ML-x variables
-      dat.t$ml.X.t <- cbind(dat.t$X[,1],
-                            dat.t$X[,1]^2,
-                            dat.t$X[,2],
-                            dat.t$X[,2]^2,
-                            dat.t$X[,1]*dat.t$X[,2])
+      dat.t$ml.X.t <- poly(dat.t$X, degree = 2, raw = TRUE)
 
       glm.out.sieve <- glm(A~ml.X.t,
                            family=quasibinomial,
@@ -116,11 +108,7 @@ elasticHTE <- function(dat.t, # RT
       dat.t$ml.ps <- glm.out.sieve$fitted.values
     }
     # OLS
-    dat.t$ml.X.t <- cbind(dat.t$X[,1],
-                          dat.t$X[,1]^2,
-                          dat.t$X[,2],
-                          dat.t$X[,2]^2,
-                          dat.t$X[,1]*dat.t$X[,2])
+    dat.t$ml.X.t <- poly(dat.t$X, degree = 2, raw = TRUE)
 
     # OLS for mu_0 for RCT and RWE
     mu0.out.t <- glm(Y[which(A==0)]~X[which(A==0),],
@@ -202,10 +190,10 @@ elasticHTE <- function(dat.t, # RT
   psi.list <- psi_est(dat.os = dat.os,
                       dat.t = dat.t)
 
-  est[paste("covj.t.",1:3,sep="" )] <- psi.list$reg.t
-  est[paste("opt.ee.",1:3,sep="" )] <- psi.list$opt.integ
-  est[paste("ee.rt(ml).",1:3,sep="" )]<- psi.list$opt.ml.t
-  est[paste("opt.ee(ml).",1:3,sep="" )]<- psi.list$opt.ml.integ
+  est[paste("covj.t.",1:p,sep="" )] <- psi.list$reg.t
+  est[paste("opt.ee.",1:p,sep="" )] <- psi.list$opt.integ
+  est[paste("ee.rt(ml).",1:p,sep="" )]<- psi.list$opt.ml.t
+  est[paste("opt.ee(ml).",1:p,sep="" )]<- psi.list$opt.ml.integ
   S.os1 <- psi.list$S.os1
 
   # permutation-based estimation
@@ -215,8 +203,8 @@ elasticHTE <- function(dat.t, # RT
   {
     n.t <- length(dat.t$Y); m <- length(dat.os$Y)
     # begin our permutation estimation
-    cnames<-c(paste("covj.t.",1:3,sep="" ),   paste("opt.ee.",1:3,sep="" ),
-              paste("ee.rt(ml).",1:3,sep="" ),paste("opt.ee(ml).",1:3,sep="" ))
+    cnames<-c(paste("covj.t.",1:p,sep="" ),   paste("opt.ee.",1:p,sep="" ),
+              paste("ee.rt(ml).",1:p,sep="" ),paste("opt.ee(ml).",1:p,sep="" ))
     ptb.S.os1<-matrix(0, nptb, p)
     ptb <- matrix(0,nptb,length(cnames))
     colnames(ptb)<-cnames
@@ -226,10 +214,10 @@ elasticHTE <- function(dat.t, # RT
       psi.list.p <- psi_est(dat.os = dat.os,
                             dat.t = dat.t)
 
-      ptb[kkk,paste("covj.t.",1:3,sep="" )] <- psi.list.p$reg.t
-      ptb[kkk,paste("opt.ee.",1:3,sep="" )] <- psi.list.p$opt.integ
-      ptb[kkk,paste("ee.rt(ml).",1:3,sep="" )] <- psi.list.p$opt.ml.t
-      ptb[kkk,paste("opt.ee(ml).",1:3,sep="" )] <- psi.list.p$opt.ml.integ
+      ptb[kkk,paste("covj.t.",1:p,sep="" )] <- psi.list.p$reg.t
+      ptb[kkk,paste("opt.ee.",1:p,sep="" )] <- psi.list.p$opt.integ
+      ptb[kkk,paste("ee.rt(ml).",1:p,sep="" )] <- psi.list.p$opt.ml.t
+      ptb[kkk,paste("opt.ee(ml).",1:p,sep="" )] <- psi.list.p$opt.ml.integ
       ptb.S.os1[kkk,] <- psi.list.p$S.os1
     }
     return(list(ptb = ptb,
@@ -248,8 +236,8 @@ elasticHTE <- function(dat.t, # RT
     ptb <- list.ptb$ptb
     ptb.S.os1 <- list.ptb$ptb.S.os1
     # compute Vrt and Veff
-    ptboptee1<-ptb[,paste("ee.rt(ml).",1:3,sep="" )]
-    ptboptee2<-ptb[,paste("opt.ee(ml).",1:3,sep="" )]
+    ptboptee1<-ptb[,paste("ee.rt(ml).",1:p,sep="" )]
+    ptboptee2<-ptb[,paste("opt.ee(ml).",1:p,sep="" )]
     Vrt <- var(ptboptee1)*m; Veff <- var(ptboptee2)*m
     Vrt;Veff
     Vrteff <- Vrt-Veff
@@ -287,14 +275,14 @@ elasticHTE <- function(dat.t, # RT
   muz1 <- expm::sqrtm(iSigSS)%*%localpar
   muz2 <- expm::sqrtm(Veff)%*%localpar
   ngen <- 1000
-  z1.samples <- mvtnorm::rmvnorm(ngen, mean=muz1, diag(3)) # z1
-  z2.samples <- mvtnorm::rmvnorm(ngen, mean=muz2, diag(3)) # z2
+  z1.samples <- mvtnorm::rmvnorm(ngen, mean=muz1, diag(p)) # z1
+  z2.samples <- mvtnorm::rmvnorm(ngen, mean=muz2, diag(p)) # z2
   z1.samples <-t(z1.samples);z2.samples <- t(z2.samples)
 
   # a sanity check
-  mu.RT <- sqrtVrteff%*%muz1 - sqrtVeff%*%muz2; var.RT <- sqrtVrteff%*%diag(3)%*%t(sqrtVrteff)+
-    sqrtVeff%*%diag(3)%*%t(sqrtVeff)
-  mu.eff <- -sqrtVeff%*%muz2; var.eff <- sqrtVeff%*%diag(3)%*%t(sqrtVeff)
+  mu.RT <- sqrtVrteff%*%muz1 - sqrtVeff%*%muz2; var.RT <- sqrtVrteff%*%diag(p)%*%t(sqrtVrteff)+
+    sqrtVeff%*%diag(p)%*%t(sqrtVeff)
+  mu.eff <- -sqrtVeff%*%muz2; var.eff <- sqrtVeff%*%diag(p)%*%t(sqrtVeff)
 
 
   z.rt.samples <-  + sqrtVrteff%*%z1.samples- sqrtVeff%*%z2.samples  #rej
@@ -374,7 +362,7 @@ elasticHTE <- function(dat.t, # RT
       }
     }
 
-    mu.z1.truncated <- NormalTruncatedFirstMom(muz1, p=p, a = qchisq(1-gamm,df=3),
+    mu.z1.truncated <- NormalTruncatedFirstMom(muz1, p=p, a = qchisq(1-gamm, df=p),
                                                b= Inf)*
       pchisq(qchisq(1-gamm,df=p),
              df=p, ncp = t(muz1)%*%muz1,
@@ -437,10 +425,10 @@ elasticHTE <- function(dat.t, # RT
   }
   kkchosen <- apply(critmse, 2, which.min)
   kkchosen.tau <- which.min(critmse.tau) # critmse%*%alpha
-  kkchosen.all <- rep(which.min(apply(critmse, 1, sum)), 3)
+  kkchosen.all <- rep(which.min(apply(critmse, 1, sum)), p)
 
   # chosen by analytic form
-  cgamma.selected.analytic <- sapply(1:3, function(x)optim(1,
+  cgamma.selected.analytic <- sapply(1:p, function(x)optim(1,
                                                            fn = mse_ee,
                                                            method = 'Brent',
                                                            muz1 = muz1, muz2 = muz2,
@@ -456,12 +444,12 @@ elasticHTE <- function(dat.t, # RT
                                         method = 'Brent',
                                         muz1 = muz1, muz2 = muz2,
                                         sqrtVrteff = sqrtVrteff, sqrtVeff = sqrtVeff,
-                                        v=NA, alpha = c(1,1,1),
+                                        v=NA, alpha = alpha,
                                         lower =1e-10, upper = 200)$par
 
   gamma.selected.analytic.all <- 1 - rep(pchisq(cgamma.selected.analytic.all,df=p),p)
 
-  nuispar["gamma.tau"] <- gamm.selected.tau <-  0.05
+  nuispar["gamma.tau"] <- gamm.selected.tau <- 0.05
   nuispar["c_gamma.tau"] <- cgamma.selected.tau <-
     qchisq(1-gamm.selected.tau,df=1)
 
@@ -514,7 +502,7 @@ elasticHTE <- function(dat.t, # RT
   mat.yes <- t(mat.yes)
   gen.value<- (z.eff.samples *mat.yes  + z.rt.samples * (1-mat.yes) )
   gen.value<-t(gen.value)
-  ve[paste("elas.",1:3,sep="" )] <- apply(gen.value,2,var,na.rm = TRUE)/m
+  ve[paste("elas.",1:p,sep="" )] <- apply(gen.value,2,var,na.rm = TRUE)/m
 
   ve['elas.tau'] <- var((gen.value%*%alpha), na.rm = TRUE)/m
 
@@ -556,13 +544,13 @@ elasticHTE <- function(dat.t, # RT
   ## for each psi
   generate_elastic <- function(muz1.new)
   {
-    z0 <-mvtnorm::rmvnorm(ngen, mean=rep(0,3), diag(3))
-    zz0<-mvtnorm::rmvnorm(ngen, mean=rep(0,3), diag(3))
+    z0 <-mvtnorm::rmvnorm(ngen, mean=rep(0,p), diag(p))
+    zz0<-mvtnorm::rmvnorm(ngen, mean=rep(0,p), diag(p))
     z0<-t(z0);zz0<-t(zz0)
     # muz1<-as.vector(sqrtiSigSS%*%c(localpar.sample))
     # muz2<-as.vector(expm::sqrtm(Veff)%*%c(localpar.sample))
     z1 <- z0+ c(muz1.new)
-    # muz2.new <- mvtnorm::rmvnorm(1, mean=muz2, diag(3))
+    # muz2.new <- mvtnorm::rmvnorm(1, mean=muz2, diag(p))
     z2 <- zz0 + c(muz2)
     mat.yes <- sapply(cgamma.selected, function(x)apply(z1*z1,2,sum)<x)
     mat.yes <- t(mat.yes)
@@ -582,7 +570,7 @@ elasticHTE <- function(dat.t, # RT
     if(conservative)
     {
       z2<- t(mvtnorm::rmvnorm(ngen, mean=expm::sqrtm(Veff)%*%c(localpar.new),
-                       diag(3)))
+                       diag(p)))
     }else{
       z2 <- t(mvtnorm::rmvnorm(ngen, mean=muz2, diag(p)))
     }
@@ -644,11 +632,11 @@ elasticHTE <- function(dat.t, # RT
 
   ## construct the Wald CI for the regular estimators
   regular.est.name <- c(
-    paste0("covj.t.", 1:3),
-    paste0("opt.ee.", 1:3),
-    paste0("ee.rt(ml).", 1:3),
-    paste0("opt.ee(ml).", 1:3),
-    paste0("elas.", 1:3)
+    paste0("covj.t.", 1:p),
+    paste0("opt.ee.", 1:p),
+    paste0("ee.rt(ml).", 1:p),
+    paste0("opt.ee(ml).", 1:p),
+    paste0("elas.", 1:p)
   )
 
   bootq1 <-
@@ -683,19 +671,17 @@ elasticHTE <- function(dat.t, # RT
   # if  statistics over the threshold
   if(Tstat1>= thres.psi){
 
-    z.rt <- t(mvtnorm::rmvnorm(1000, mean=rep(0,3), Vrt))
+    z.rt <- t(mvtnorm::rmvnorm(1000, mean=rep(0,p), Vrt))
     z.rt <- t(z.rt)
     gen.value <- z.rt
     # both two versions are the same
     bootq1[paste("elas1.",1:p,sep="" )] <- bootq1[paste("elas2.",1:p,sep="" )] <- #est[paste("elas.",1:p,sep="" )] +
       apply(gen.value,2,quantile,probs=0.025,type=5,na.rm = TRUE)/sqrt(m)
 
-    bootq2[paste("elas1.",1:3,sep="" )] <- bootq2[paste("elas2.",1:3,sep="" )] <- #est[paste("elas.",1:p,sep="" )] +
+    bootq2[paste("elas1.",1:p,sep="" )] <- bootq2[paste("elas2.",1:p,sep="" )] <- #est[paste("elas.",1:p,sep="" )] +
       apply(gen.value,2,quantile,probs=0.975,type=5,na.rm = TRUE)/sqrt(m)
 
   }
-
-
   return(list(
     est = est, ve = ve,
     CIs.inf = bootq1,

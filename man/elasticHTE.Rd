@@ -9,7 +9,7 @@ elasticHTE(
   dat.os,
   thres.psi = sqrt(log(m)),
   fixed = FALSE,
-  alpha = c(0, 0, 0)
+  alpha = rep(0, ncol(dat.t$X) + 1)
 )
 }
 \arguments{
