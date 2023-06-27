@@ -84,7 +84,9 @@ elasticHTE <- function(dat.t, # RT
     dat.os$ps <- glm.out.ols$fitted.values
     # sieve method
     ## construct the ML-x variables (up to order-2)
-    dat.os$ml.X.os <- poly(dat.os$X, degree = 2, raw = TRUE)
+    ml.X.os <- poly(dat.os$X, degree = 2, raw = TRUE)
+    ## drop duplicated columns
+    dat.os$ml.X.os <- ml.X.os[, !duplicated(t(ml.X.os))]
     glm.out.sieve <- glm(A~ml.X.os,
                          family=quasibinomial,
                          weights=q,data=dat.os)
@@ -107,8 +109,9 @@ elasticHTE <- function(dat.t, # RT
       dat.t$ml.ps <- glm.out.sieve$fitted.values
     }
     # OLS
-    dat.t$ml.X.t <- poly(dat.t$X, degree = 2, raw = TRUE)
-
+    ml.X.t <- poly(dat.t$X, degree = 2, raw = TRUE)
+    ## drop duplicated columns
+    dat.t$ml.X.t <- ml.X.t[, !duplicated(t(ml.X.t))]
     # OLS for mu_0 for RCT and RWE
     mu0.out.t <- glm(Y[which(A==0)]~X[which(A==0),],
                      weights=q[which(A==0)],
