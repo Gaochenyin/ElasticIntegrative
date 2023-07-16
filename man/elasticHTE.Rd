@@ -5,17 +5,34 @@
 \title{Elastic integrative analysis for heterogenous treatment effect}
 \usage{
 elasticHTE(
+  mainName,
+  contName,
+  propenName,
   dat.t,
   dat.os,
-  thres.psi = sqrt(log(m)),
+  sl.lib.A = c("SL.glm"),
+  sl.lib.Y = c("SL.glmnet"),
+  thres.psi = sqrt(log(length(dat.os$Y))),
   fixed = FALSE,
-  alpha = rep(0, ncol(dat.t$X) + 1)
+  alpha = rep(0, length(contName) + 1),
+  ...
 )
 }
 \arguments{
-\item{dat.t}{A list contains X, Y and A for RCT.}
+\item{mainName}{A character object dictates the covariates used to model the main effects of the outcomes}
 
-\item{dat.os}{A list contains X, Y and A for RWE.}
+\item{contName}{A character object dictates the covariates used to model the contrasts of the outcomes}
+
+\item{propenName}{A character object dictates the covariates used to model the propensities for treatment}
+
+\item{dat.t}{A \code{\link[=data.frame]{data.frame()}} contains X, Y and A for RCT.}
+
+\item{dat.os}{A \code{\link[=data.frame]{data.frame()}} contains X, Y and A for RWE.}
+
+\item{sl.lib.A}{A character vector of prediction algorithms to model propensity scores for RWE (and RCT if not specified).
+A list of available functions can be found with \code{\link[SuperLearner:listWrappers]{SuperLearner::listWrappers()}}.}
+
+\item{sl.lib.Y}{A character vector of prediction algorithms to model conditional outcomes for RCT and RWE.}
 
 \item{thres.psi}{A numerical value indicating the threshold for constructing adaptive confidence interval.}
 
@@ -28,6 +45,8 @@ in which \code{p} is the dimension of \code{X} plus one (i.e., add the intercept
 }}
 
 \item{alpha}{a vector for estimating the linear combination of the coefficients for treatment modifiers (depreciated).}
+
+\item{...}{additional arguments to be passed to \code{\link[SuperLearner:SuperLearner]{SuperLearner::SuperLearner()}}.}
 }
 \value{
 A list with components:
@@ -63,7 +82,10 @@ datasets.all <- GenData(psi0 = c(0,1,1),
 # choice of kappa_n, default is tau * sqrt(log(m)) (similar to BIC criteria)
 thres.psi  <-  sqrt(log(m)) # threshold for ECI psi
 # conduct the elastic integrative analysis
-result.elastic <- elasticHTE(dat.t = datasets.all$RT,
+result.elastic <- elasticHTE(mainName = c('X1', 'X2'),
+                             contName = c('X1', 'X2'),
+                             propenName = c('X1', 'X2'),
+                             dat.t = datasets.all$RT,
                              dat.os = datasets.all$RW,
                              fixed = FALSE)
 result.elastic

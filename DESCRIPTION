@@ -16,7 +16,8 @@ Imports:
     MASS,
     expm,
     kableExtra,
-    mvtnorm
+    mvtnorm,
+    SuperLearner
 Suggests: 
     knitr,
     rmarkdown

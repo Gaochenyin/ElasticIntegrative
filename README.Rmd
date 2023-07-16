@@ -44,6 +44,7 @@ library(ElasticIntegrative)
 This is an example for illustration
 ```{r example}
 library(ElasticIntegrative)
+library(SuperLearner)
 ## basic example code for data generation
 set.seed(2333)
 ## setups
@@ -60,10 +61,10 @@ X1.os <- rnorm(n, mean.x, 1)
 X2.os <- rnorm(n, mean.x, 1)
 X3.os <- rnorm(n, mean.x, 1) 
 ## construct the basis functions
-h.X.rt <- cbind(X1.rt, X2.rt, X3.rt)
-h.X.os <- cbind(X1.os, X2.os, X3.os)
-f.X.rt <- cbind(X1.rt, X2.rt)
-f.X.os <- cbind(X1.os, X2.os)
+h.X.rt <- cbind(X1 = X1.rt, X2 = X2.rt, X3 = X3.rt)
+h.X.os <- cbind(X1 = X1.os, X2 = X2.os, X3 = X3.os)
+f.X.rt <- cbind(X1 = X1.rt, X2 = X2.rt)
+f.X.os <- cbind(X1 = X1.os, X2 = X2.os)
 # -------------------------------
 ## construct Y for RCT and RWE populations
 ### RCT population
@@ -96,7 +97,8 @@ Y0.os <- Y0.os[P.ind]
 Y1.os <- Y1.os[P.ind]
 # a.opt is chosen to maintain the proportion of the treated at about .5
 a.opt <- uniroot(function(a) {
-  ps <- expoit(a - 1 * X.os[, 1] + 1 * X.os[, 2] - tlocalpar * X.confounder.os)
+  ps <- exp(a - 1 * X.os[, 1] + 1 * X.os[, 2] - tlocalpar * X.confounder.os)/
+    {1+exp(a - 1 * X.os[, 1] + 1 * X.os[, 2] - tlocalpar * X.confounder.os)}
   mean(ps) - .5
 }, c(-100, 100))$root
 eA <- exp(a.opt - 1 * X.os[, 1] + 1 * X.os[, 2] - tlocalpar * X.confounder.os)/
@@ -104,20 +106,25 @@ eA <- exp(a.opt - 1 * X.os[, 1] + 1 * X.os[, 2] - tlocalpar * X.confounder.os)/
 A.os <- sapply(eA, rbinom, n = 1, size = 1)
 Y.os <- Y1.os * A.os + Y0.os * (1 - A.os)
 # organize the RT and RW datasets
-dat.t <- list(
-  Y = Y.rt, A = A.rt, X = X.rt, q = rep(1, n.t),
+dat.t <- data.frame(
+  Y = Y.rt, A = A.rt, X.rt, q = rep(1, n.t),
   ps = ps.t,
   ml.ps = ps.t
 )
-dat.os <- list(
-  Y = Y.os, A = A.os, X = X.os, q = rep(1, m)
+
+dat.os <- data.frame(
+  Y = Y.os, A = A.os, X.os, q = rep(1, m)
   )
 # begin the elastic integrative analysis
 # choice of kappa_n, default is sqrt(log(m)) (similar to the BIC criteria)
-result.elastic <- elasticHTE(dat.t = dat.t,
+result.elastic <- elasticHTE(mainName = c('X1', 'X2'),
+                             contName = c('X1', 'X2'),
+                             propenName = c('X1', 'X2'),
+                             dat.t = dat.t,
                              dat.os = dat.os,
                              thres.psi = sqrt(log(m)), # threshold for ACI psi
-                             fixed = FALSE)
+                             fixed = FALSE,
+                             cvControl = list(V = 1L))
 ```
 
 ## Value

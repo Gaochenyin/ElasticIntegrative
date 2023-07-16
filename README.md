@@ -15,11 +15,11 @@ real-world evidence study from [Yang et al.,
 
 Two datasets
 
--   The randomized trial contains observations on (A,X,Y), where the
-    treatment assignment A is randomized.
+- The randomized trial contains observations on (A,X,Y), where the
+  treatment assignment A is randomized.
 
--   The real-world evidence study contains observations on (A,X,Y),
-    where the treatment assignment A may be confounded.
+- The real-world evidence study contains observations on (A,X,Y), where
+  the treatment assignment A may be confounded.
 
 ## Installation with `devtools`:
 
@@ -36,6 +36,15 @@ This is an example for illustration
 
 ``` r
 library(ElasticIntegrative)
+library(SuperLearner)
+#> 载入需要的程辑包：nnls
+#> 载入需要的程辑包：gam
+#> 载入需要的程辑包：splines
+#> 载入需要的程辑包：foreach
+#> Loaded gam 1.20.2
+#> Super Learner
+#> Version: 2.0-28
+#> Package created on 2021-05-04
 ## basic example code for data generation
 set.seed(2333)
 ## setups
@@ -52,10 +61,10 @@ X1.os <- rnorm(n, mean.x, 1)
 X2.os <- rnorm(n, mean.x, 1)
 X3.os <- rnorm(n, mean.x, 1) 
 ## construct the basis functions
-h.X.rt <- cbind(X1.rt, X2.rt, X3.rt)
-h.X.os <- cbind(X1.os, X2.os, X3.os)
-f.X.rt <- cbind(X1.rt, X2.rt)
-f.X.os <- cbind(X1.os, X2.os)
+h.X.rt <- cbind(X1 = X1.rt, X2 = X2.rt, X3 = X3.rt)
+h.X.os <- cbind(X1 = X1.os, X2 = X2.os, X3 = X3.os)
+f.X.rt <- cbind(X1 = X1.rt, X2 = X2.rt)
+f.X.os <- cbind(X1 = X1.os, X2 = X2.os)
 # -------------------------------
 ## construct Y for RCT and RWE populations
 ### RCT population
@@ -88,7 +97,8 @@ Y0.os <- Y0.os[P.ind]
 Y1.os <- Y1.os[P.ind]
 # a.opt is chosen to maintain the proportion of the treated at about .5
 a.opt <- uniroot(function(a) {
-  ps <- expoit(a - 1 * X.os[, 1] + 1 * X.os[, 2] - tlocalpar * X.confounder.os)
+  ps <- exp(a - 1 * X.os[, 1] + 1 * X.os[, 2] - tlocalpar * X.confounder.os)/
+    {1+exp(a - 1 * X.os[, 1] + 1 * X.os[, 2] - tlocalpar * X.confounder.os)}
   mean(ps) - .5
 }, c(-100, 100))$root
 eA <- exp(a.opt - 1 * X.os[, 1] + 1 * X.os[, 2] - tlocalpar * X.confounder.os)/
@@ -96,20 +106,25 @@ eA <- exp(a.opt - 1 * X.os[, 1] + 1 * X.os[, 2] - tlocalpar * X.confounder.os)/
 A.os <- sapply(eA, rbinom, n = 1, size = 1)
 Y.os <- Y1.os * A.os + Y0.os * (1 - A.os)
 # organize the RT and RW datasets
-dat.t <- list(
-  Y = Y.rt, A = A.rt, X = X.rt, q = rep(1, n.t),
+dat.t <- data.frame(
+  Y = Y.rt, A = A.rt, X.rt, q = rep(1, n.t),
   ps = ps.t,
   ml.ps = ps.t
 )
-dat.os <- list(
-  Y = Y.os, A = A.os, X = X.os, q = rep(1, m)
+
+dat.os <- data.frame(
+  Y = Y.os, A = A.os, X.os, q = rep(1, m)
   )
 # begin the elastic integrative analysis
 # choice of kappa_n, default is sqrt(log(m)) (similar to the BIC criteria)
-result.elastic <- elasticHTE(dat.t = dat.t,
+result.elastic <- elasticHTE(mainName = c('X1', 'X2'),
+                             contName = c('X1', 'X2'),
+                             propenName = c('X1', 'X2'),
+                             dat.t = dat.t,
                              dat.os = dat.os,
                              thres.psi = sqrt(log(m)), # threshold for ACI psi
-                             fixed = FALSE)
+                             fixed = FALSE,
+                             cvControl = list(V = 1L))
 ```
 
 ## Value
@@ -131,23 +146,23 @@ result.elastic <- elasticHTE(dat.t = dat.t,
     #>   0.07641376   0.94788773   1.05146075   0.07641376   0.94788773   1.05146075
     #> ve
     #>     covj.t.1     covj.t.2     covj.t.3  ee.rt(ml).1  ee.rt(ml).2  ee.rt(ml).3 
-    #>  0.030520919  0.016696668  0.016015331  0.032511804  0.017733931  0.016544565 
+    #>  0.030100673  0.017169858  0.020132153  0.030455816  0.017169809  0.020936258 
     #> opt.ee(ml).1 opt.ee(ml).2 opt.ee(ml).3       elas.1       elas.2       elas.3 
-    #>  0.004569076  0.003832585  0.002932012  0.004462569  0.003891839  0.002854052
+    #>  0.006598755  0.004010907  0.003080497  0.005862381  0.004043671  0.003188111
     #> CI
     #>                    lower     upper
-    #> covj.t.1     -0.31389503 0.3709257
-    #> covj.t.2      0.75125978 1.2577756
-    #> covj.t.3      0.69507293 1.1911465
-    #> ee.rt(ml).1  -0.29777886 0.4090245
-    #> ee.rt(ml).2   0.73980156 1.2618137
-    #> ee.rt(ml).3   0.72045045 1.2246539
-    #> opt.ee(ml).1 -0.05606988 0.2088974
-    #> opt.ee(ml).2  0.82655051 1.0692249
-    #> opt.ee(ml).3  0.94533250 1.1575890
-    #> elas.1       -0.12530744 0.2137688
-    #> elas.2        0.86336552 1.1751818
-    #> elas.3        0.84138533 1.1157781
+    #> covj.t.1     -0.31152951 0.3685602
+    #> covj.t.2      0.74769614 1.2613392
+    #> covj.t.3      0.66501468 1.2212047
+    #> ee.rt(ml).1  -0.28642214 0.3976678
+    #> ee.rt(ml).2   0.74398645 1.2576288
+    #> ee.rt(ml).3   0.68895777 1.2561465
+    #> opt.ee(ml).1 -0.08279945 0.2356270
+    #> opt.ee(ml).2  0.82375983 1.0720156
+    #> opt.ee(ml).3  0.94267838 1.1602431
+    #> elas.1       -0.13145638 0.2803858
+    #> elas.2        0.86455094 1.1823684
+    #> elas.3        0.84800403 1.1233989
 
 ## More examples
 
@@ -155,9 +170,9 @@ result.elastic <- elasticHTE(dat.t = dat.t,
 browseVignettes("ElasticIntegrative")
 ```
 
--   [Simulation: adaptive
-    selection](https://gaochenyin.github.io/ElasticIntegrative/doc/sim_psi011_111)
--   [Simulation: comparing AIPW and
-    SES](https://gaochenyin.github.io/ElasticIntegrative/doc/sim_AIPWvsSES)
--   [Simulation: fixed
-    threshold](https://gaochenyin.github.io/ElasticIntegrative/doc/sim_psi011_111_fixed)
+- [Simulation: adaptive
+  selection](https://gaochenyin.github.io/ElasticIntegrative/doc/sim_psi011_111)
+- [Simulation: comparing AIPW and
+  SES](https://gaochenyin.github.io/ElasticIntegrative/doc/sim_AIPWvsSES)
+- [Simulation: fixed
+  threshold](https://gaochenyin.github.io/ElasticIntegrative/doc/sim_psi011_111_fixed)

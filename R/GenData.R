@@ -27,9 +27,9 @@ GenData <- function(seed = NULL,
     X3.temp <- rnorm(n, mean.x, 1) #+sin(X1.temp) - sin(X2.temp)
     ## construct functions
     h.X <- cbind(X1, X2, X3)
-    h.Xtemp <- cbind(X1.temp, X2.temp, X3.temp)
+    h.Xtemp <- cbind(X1 = X1.temp, X2 = X2.temp, X3 = X3.temp)
     f.X <- cbind(X1, X2)
-    f.Xtemp <- cbind(X1.temp, X2.temp)
+    f.Xtemp <- cbind(X1 = X1.temp, X2 = X2.temp)
 
     ## construct Y for RCT and RWE
     ### RCT
@@ -126,12 +126,12 @@ GenData <- function(seed = NULL,
   Y.os <- Y1.os * A.os + Y0.os * (1 - A.os)
 
   # return the RT and RW data-sets
-  dat.t <- list(
-    Y = Y.t, A = A.t, X = X.t, q = rep(1, n.t),
+  dat.t <- data.frame(
+    Y = Y.t, A = A.t, X.t, q = rep(1, n.t),
     ps = ps.t,
     ml.ps = ps.t
   )
-  dat.os <- list(Y = Y.os, A = A.os, X = X.os, q = rep(1, m))
+  dat.os <- data.frame(Y = Y.os, A = A.os, X.os, q = rep(1, m))
   list(
     RT = dat.t,
     RW = dat.os
@@ -139,11 +139,11 @@ GenData <- function(seed = NULL,
 }
 
 # score functions
-ee1 <- function(par, dat) {
+ee1 <- function(par, dat, contName) {
   psi <- par
   Y <- dat$Y
   A <- dat$A
-  X <- dat$X
+  X <- as.matrix(dat[, contName])
   q <- dat$q
   ps <- dat$ps
   mu0 <- dat$mu0
@@ -152,11 +152,11 @@ ee1 <- function(par, dat) {
 }
 
 # score functions divided for sieve approximation
-ee1.ml <- function(par, dat) {
+ee1.ml <- function(par, dat, contName) {
   psi <- par
   Y <- dat$Y
   A <- dat$A
-  X <- dat$X
+  X <- as.matrix(dat[, contName])
   q <- dat$q
   ps <- dat$ml.ps
   mu0 <- dat$ml.mu0
@@ -165,11 +165,11 @@ ee1.ml <- function(par, dat) {
 }
 
 # score functions divided by sigma for sieve approximation
-ee1.ml.new <- function(par, dat) {
+ee1.ml.new <- function(par, dat, contName) {
   psi <- par
   Y <- dat$Y
   A <- dat$A
-  X <- dat$X
+  X <- as.matrix(dat[, contName])
   q <- dat$q
   ps <- dat$ml.ps
   mu0 <- dat$ml.mu0

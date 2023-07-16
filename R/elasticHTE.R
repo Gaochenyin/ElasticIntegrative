@@ -9,8 +9,14 @@
 #' how the treatment effect varies over the treatment modifiers.
 #'
 #'
-#' @param dat.t A list contains X, Y and A for RCT.
-#' @param dat.os A list contains X, Y and A for RWE.
+#' @param mainName A character object dictates the covariates used to model the main effects of the outcomes
+#' @param contName A character object dictates the covariates used to model the contrasts of the outcomes
+#' @param propenName A character object dictates the covariates used to model the propensities for treatment
+#' @param dat.t A [data.frame()] contains X, Y and A for RCT.
+#' @param dat.os A [data.frame()] contains X, Y and A for RWE.
+#' @param sl.lib.A A character vector of prediction algorithms to model propensity scores for RWE (and RCT if not specified).
+#' A list of available functions can be found with [SuperLearner::listWrappers()].
+#' @param sl.lib.Y A character vector of prediction algorithms to model conditional outcomes for RCT and RWE.
 #' @param thres.psi A numerical value indicating the threshold for constructing adaptive confidence interval.
 #' @param fixed A boolean regarding how to select the tuning parameter `c_gamma`.
 #' * `FALSE` (the default): use adaptive selection strategy
@@ -18,6 +24,7 @@
 #'   The default fixed threshold is [qchisq(1 -0.05, df = p)],
 #'   in which `p` is the dimension of `X` plus one (i.e., add the intercept).
 #' @param alpha a vector for estimating the linear combination of the coefficients for treatment modifiers (depreciated).
+#' @param ... additional arguments to be passed to [SuperLearner::SuperLearner()].
 #' @returns A list with components:
 #' * est: estimated `psi` associated with the treatment modifiers.
 #' * ve: estimated standard error for `psi`.
@@ -41,7 +48,10 @@
 #' # choice of kappa_n, default is tau * sqrt(log(m)) (similar to BIC criteria)
 #' thres.psi  <-  sqrt(log(m)) # threshold for ECI psi
 #' # conduct the elastic integrative analysis
-#' result.elastic <- elasticHTE(dat.t = datasets.all$RT,
+#' result.elastic <- elasticHTE(mainName = c('X1', 'X2'),
+#'                              contName = c('X1', 'X2'),
+#'                              propenName = c('X1', 'X2'),
+#'                              dat.t = datasets.all$RT,
 #'                              dat.os = datasets.all$RW,
 #'                              fixed = FALSE)
 #' result.elastic
@@ -54,17 +64,23 @@
 #'   ## elas.v1 performs better in our simulation studies.
 #' # $nuispar: estimates for various nuisance parameter
 #' @export
-elasticHTE <- function(dat.t, # RT
-                       dat.os, # RW
-                       thres.psi = sqrt(log(m)), # threshold for adaptive CI
+elasticHTE <- function(mainName,
+                       contName,
+                       propenName,
+                       dat.t, # RT
+                       dat.os, # RW,
+                       sl.lib.A = c('SL.glm'), # list of methods for A
+                       sl.lib.Y = c('SL.glm'), # list of methods for Y
+                       thres.psi = sqrt(log(length(dat.os$Y))), # threshold for adaptive CI
                        fixed = FALSE, # fixed c_gamma
-                       alpha = rep(0, ncol(dat.t$X)+1)
+                       alpha = rep(0, length(contName)+1),
+                       ...
                        )
 {
 
   n.t <- length(dat.t$Y)
   m <- length(dat.os$Y)
-  p <- ncol(dat.t$X)+1
+  p <- length(contName)+1
   # initialization
   est <-NULL
   ve  <-NULL
@@ -74,89 +90,220 @@ elasticHTE <- function(dat.t, # RT
 
   # psi estimation
   psi_est <- function(dat.os = dat.os,
-                      dat.t = dat.t)
+                      dat.t = dat.t, ...)
   {
+    ## super-learner method
     # for the psi estimation
-    # OLS
-    glm.out.ols <- glm(A~X,
-                       family=quasibinomial,
-                       weights=q,data=dat.os)
-    dat.os$ps <- glm.out.ols$fitted.values
+    glm.out.ols <- SuperLearner::SuperLearner(Y = dat.os$A,
+                                              X = as.data.frame(dat.os[, propenName]),
+                                              family = 'quasibinomial',
+                                              SL.library = sl.lib.A,
+                                              obsWeights = dat.os$q,
+                                              ...)
+
+    dat.os$ps <- glm.out.ols$SL.predict
     # sieve method
     ## construct the ML-x variables (up to order-2)
-    ml.X.os <- poly(dat.os$X, degree = 2, raw = TRUE)
+    ml.X.os <- poly(as.matrix(dat.os[, propenName]),
+                    degree = 2, raw = TRUE)
     ## drop duplicated columns
     dat.os$ml.X.os <- ml.X.os[, !duplicated(t(ml.X.os))]
-    glm.out.sieve <- glm(A~ml.X.os,
-                         family=quasibinomial,
-                         weights=q,data=dat.os)
-    dat.os$ml.ps <- glm.out.sieve$fitted.values
+
+    glm.out.sieve <- SuperLearner::SuperLearner(Y = dat.os$A,
+                                                X = as.data.frame(dat.os$ml.X.os),
+                                                family = 'quasibinomial',
+                                                SL.library = sl.lib.A,
+                                                obsWeights = dat.os$q,
+                                                ...)
+    dat.os$ml.ps <- glm.out.sieve$SL.predict
+
+    # ## standard generalized linear regression
+    # glm.out.ols <- glm(as.formula(paste0('A~',
+    #                                      paste0(propenName,
+    #                                             collapse = '+'))),
+    #                    family=quasibinomial,
+    #                    weights=q, data = dat.os)
+    # dat.os$ps <- glm.out.ols$fitted.values
+    # # sieve method
+    # ## construct the ML-x variables (up to order-2)
+    # ml.X.os <- poly(as.matrix(dat.os[, propenName]),
+    #                 degree = 2, raw = TRUE)
+    # ## drop duplicated columns
+    # dat.os$ml.X.os <- ml.X.os[, !duplicated(t(ml.X.os))]
+    # glm.out.sieve <- glm(A~ml.X.os,
+    #                      family=quasibinomial,
+    #                      weights=q,data=dat.os)
+    # dat.os$ml.ps <- glm.out.sieve$fitted.values
 
     if(any(dat.t$ps!=0.5)) # if not equally weighted
     {
       # OLS
-      glm.out.ols <- glm(A~X,
-                         family=quasibinomial,
-                         weights=q,data=dat.t)
-      dat.t$ps <- glm.out.ols$fitted.values
+      glm.out.ols <- SuperLearner::SuperLearner(Y = dat.t$A,
+                                 X = as.data.frame(dat.t[, propenName]),
+                                 family = 'quasibinomial',
+                                 SL.library = sl.lib.A,
+                                 obsWeights = dat.t$q,
+                                 ...)
+      dat.t$ps <- glm.out.ols$SL.predict
+
+      # glm.out.ols <- glm(as.formula(paste0('A~',
+      #                                      paste0(propenName,
+      #                                             collapse = '+'))),
+      #                    family=quasibinomial,
+      #                    weights=q, data=dat.t)
+      # dat.t$ps <- glm.out.ols$fitted.values
+
       # sieve method
       ## construct the ML-x variables
-      dat.t$ml.X.t <- poly(dat.t$X, degree = 2, raw = TRUE)
+      dat.t$ml.X.t <- poly(as.matrix(dat.t[, propenName]),
+                           degree = 2, raw = TRUE)
 
-      glm.out.sieve <- glm(A~ml.X.t,
-                           family=quasibinomial,
-                           weights=q,data=dat.t)
-      dat.t$ml.ps <- glm.out.sieve$fitted.values
+      ## super-learner algorithm
+      glm.out.sieve <- SuperLearner::SuperLearner(Y = dat.t$A,
+                                 X = as.data.frame(dat.t$ml.X.t),
+                                 family = 'quasibinomial',
+                                 SL.library = sl.lib.A,
+                                 obsWeights = dat.t$q,
+                                 ...)
+      dat.t$ml.ps <- glm.out.sieve$SL.predict
+
+      # glm.out.sieve <- glm(A~ml.X.t,
+      #                      family=quasibinomial,
+      #                      weights=q,data=dat.t)
+      # dat.t$ml.ps <- glm.out.sieve$fitted.values
     }
-    # OLS
-    ml.X.t <- poly(dat.t$X, degree = 2, raw = TRUE)
-    ## drop duplicated columns
-    dat.t$ml.X.t <- ml.X.t[, !duplicated(t(ml.X.t))]
-    # OLS for mu_0 for RCT and RWE
-    mu0.out.t <- glm(Y[which(A==0)]~X[which(A==0),],
-                     weights=q[which(A==0)],
-                     data=dat.t)
-    dat.t$mu0 <- cbind(1,dat.t$X)%*%mu0.out.t$coeff
 
-    mu0.out.os <- glm(Y[which(A==0)]~X[which(A==0),],
-                      weights=q[which(A==0)],
-                      data=dat.os)
-    dat.os$mu0 <- cbind(1,dat.os$X)%*%mu0.out.os$coeff
+    ## OLS for mu_0 for RCT and RWE
+    mu0.out.t <- SuperLearner::SuperLearner(Y = dat.t$Y[which(dat.t$A==0)],
+                               X = as.data.frame(dat.t[which(dat.t$A==0), mainName]),
+                               SL.library = sl.lib.Y,
+                               obsWeights = dat.t$q[which(dat.t$A==0)],
+                               ...)
+    dat.t$mu0 <- predict(mu0.out.t,
+                         dat.t[, mainName])$pred
+
+    mu0.out.os <- SuperLearner::SuperLearner(Y = dat.os$Y[which(dat.os$A==0)],
+                               X = as.data.frame(dat.os[which(dat.os$A==0), mainName]),
+                               SL.library = sl.lib.Y,
+                               obsWeights = dat.os$q[which(dat.os$A==0)],
+                               ...)
+    dat.os$mu0 <- predict(mu0.out.os,
+                          dat.os[, mainName])$pred
+
+    # mu0.out.t <- glm(as.formula(paste0('Y~',
+    #                                    paste0(mainName,
+    #                                           collapse = '+'))),
+    #                  weights=q,
+    #                  data=dat.t, subset = A == 0)
+    # dat.t$mu0 <- as.matrix(cbind(1, dat.t[, mainName]))%*%
+    #   mu0.out.t$coeff
+    #
+    # mu0.out.os <- glm(as.formula(paste0('Y~',
+    #                                     paste0(mainName,
+    #                                            collapse = '+'))),
+    #                   weights=q,
+    #                   data=dat.os, subset = A == 0)
+    # dat.os$mu0 <- as.matrix(cbind(1, dat.os[, mainName]))%*%
+    #   mu0.out.os$coeff
 
     # sieve method for mu for RCT and RWE
-    ## RCT
-    mu1.out.t <- glm(Y[which(A==1)]~ml.X.t[which(A==1),],
-                     weights=q[which(A==1)],
-                     data=dat.t)
-    dat.t$ml.mu1 <- cbind(1,dat.t$ml.X.t)%*%
-      mu1.out.t$coeff
+    ml.X.t <- poly(as.matrix(dat.t[, mainName]),
+                   degree = 2, raw = TRUE)
+    ## drop duplicated columns
+    dat.t$ml.X.t <- ml.X.t[, !duplicated(t(ml.X.t))]
 
-    mu0.out.t <- glm(Y[which(A==0)]~ml.X.t[which(A==0),],
-                     weights=q[which(A==0)],
-                     data=dat.t)
-    dat.t$ml.mu0 <- cbind(1,dat.t$ml.X.t)%*%
-      mu0.out.t$coeff
-
-    ## RWE
-    mu1.out.os <- glm(Y[which(A==1)]~ml.X.os[which(A==1),],
-                      weights=q[which(A==1)],
-                      data=dat.os)
-    dat.os$ml.mu1 <- cbind(1,dat.os$ml.X.os)%*%
-      mu1.out.os$coeff
+    ml.X.os <- poly(as.matrix(dat.os[, mainName]),
+                   degree = 2, raw = TRUE)
+    ## drop duplicated columns
+    dat.os$ml.X.os <- ml.X.os[, !duplicated(t(ml.X.os))]
 
 
-    mu0.out.os <- glm(Y[which(A==0)]~ml.X.os[which(A==0),],
-                      weights=q[which(A==0)],
-                      data=dat.os)
-    dat.os$ml.mu0 <- cbind(1,dat.os$ml.X.os)%*%
-      mu0.out.os$coeff
+    # RCT
+    mu1.out.t <- SuperLearner::SuperLearner(Y = dat.t$Y[which(dat.t$A==1)],
+                                            X = as.data.frame(dat.t$ml.X.t[which(dat.t$A==1), ]),
+                                            SL.library = sl.lib.Y,
+                                            obsWeights = dat.t$q[which(dat.t$A==1)],
+                                            ...)
+    dat.t$ml.mu1 <- predict(mu1.out.t,
+                         as.data.frame(dat.t$ml.X.t))$pred
+
+    mu0.out.t <- SuperLearner::SuperLearner(Y = dat.t$Y[which(dat.t$A==0)],
+                                            X = as.data.frame(dat.t$ml.X.t[which(dat.t$A==0), ]),
+                                            SL.library = sl.lib.Y,
+                                            obsWeights = dat.t$q[which(dat.t$A==0)],
+                                            ...)
+    dat.t$ml.mu0 <- predict(mu0.out.t,
+                            as.data.frame(dat.t$ml.X.t))$pred
+
+
+
+
+    # OLS for outcomes Y(0)
+    # mu0.out.os <- glm(Y~ml.X.os,
+    #                   weights=q,
+    #                   data=dat.os, subset = A == 0)
+    # dat.os$ml.mu0 <- cbind(1,dat.os$ml.X.os)%*%
+    #   mu0.out.os$coeff
+    #
+    # mu0.out.t <- glm(Y~ml.X.t,
+    #                  weights=q,
+    #                  data=dat.t, subset = A == 0)
+    # dat.t$ml.mu0 <- cbind(1,dat.t$ml.X.t)%*%
+    #   mu0.out.t$coeff
+
+    # RWE
+    mu1.out.os <- SuperLearner::SuperLearner(Y = dat.os$Y[which(dat.os$A==1)],
+                                            X = as.data.frame(dat.os$ml.X.os[which(dat.os$A==1), ]),
+                                            SL.library = sl.lib.Y,
+                                            obsWeights = dat.os$q[which(dat.os$A==1)],
+                                            ...)
+    dat.os$ml.mu1 <- predict(mu1.out.os,
+                            as.data.frame(dat.os$ml.X.os))$pred
+
+    mu0.out.os <- SuperLearner::SuperLearner(Y = dat.os$Y[which(dat.os$A==0)],
+                                            X = as.data.frame(dat.os$ml.X.os[which(dat.os$A==0), ]),
+                                            SL.library = sl.lib.Y,
+                                            obsWeights = dat.os$q[which(dat.os$A==0)],
+                                            ...)
+    dat.os$ml.mu0 <- predict(mu0.out.os,
+                            as.data.frame(dat.os$ml.X.os))$pred
+
+    # # OLS for outcomes Y(1)
+    # ml.X.t <- poly(as.matrix(dat.t[, union(mainName, contName)]),
+    #                degree = 2, raw = TRUE)
+    # ## drop duplicated columns
+    # dat.t$ml.X.t <- ml.X.t[, !duplicated(t(ml.X.t))]
+    #
+    # ml.X.os <- poly(as.matrix(dat.os[, union(mainName, contName)]),
+    #                 degree = 2, raw = TRUE)
+    # ## drop duplicated columns
+    # dat.os$ml.X.os <- ml.X.os[, !duplicated(t(ml.X.os))]
+    #
+    #
+    # mu1.out.t <- glm(Y~ml.X.t,
+    #                  weights=q,
+    #                  data=dat.t, subset = A == 1)
+    # dat.t$ml.mu1 <- cbind(1,dat.t$ml.X.t)%*%
+    #   mu1.out.t$coeff
+    #
+    # mu1.out.os <- glm(Y~ml.X.os,
+    #                   weights=q,
+    #                   data=dat.os, subset = A == 1)
+    # dat.os$ml.mu1 <- cbind(1,dat.os$ml.X.os)%*%
+    #   mu1.out.os$coeff
+
 
     # obtain the sigma_Y for mu_0 and mu_1 RWE
-    dat.os$ml.sigma1 <- summary(mu1.out.os)$dispersion
-    dat.os$ml.sigma0 <- summary(mu0.out.os)$dispersion
-    dat.integ<-list( Y = c(dat.os$Y, dat.t$Y),
+    dat.os$ml.sigma1 <- sqrt(mean((dat.os$Y[which(dat.os$A==1)] -
+                                     dat.os$ml.mu1[which(dat.os$A==1)])**2))
+    dat.os$ml.sigma0 <- sqrt(mean((dat.os$Y[which(dat.os$A==0)] -
+                                     dat.os$ml.mu0[which(dat.os$A==0)])**2))
+    # dat.os$ml.sigma1 <- summary(mu1.out.os)$dispersion
+    # dat.os$ml.sigma0 <- summary(mu0.out.os)$dispersion
+    dat.integ<-data.frame( Y = c(dat.os$Y, dat.t$Y),
                      A = c(dat.os$A, dat.t$A),
-                     X = rbind(dat.os$X, dat.t$X),
+                     rbind(dat.os[, union(mainName, contName)],
+                               dat.t[, union(mainName, contName)]),
                      q = c(dat.os$q, dat.t$q),
                      mu0 = c(dat.os$mu0, dat.t$mu0),
                      ps = c(dat.os$ps, dat.t$ps),
@@ -165,22 +312,30 @@ elasticHTE <- function(dat.t, # RT
                      ml.X = rbind(dat.os$ml.X.os,
                                   dat.t$ml.X.t))
     ## covariate adjustment (trial) --> aipw adjusted approach
-    Y.tadj<- dat.t$A*(dat.t$Y-dat.t$ml.mu1)/dat.t$ml.ps-
+    dat.t$Y.tadj<- dat.t$A*(dat.t$Y-dat.t$ml.mu1)/dat.t$ml.ps-
       (1-dat.t$A)*(dat.t$Y-dat.t$ml.mu0)/(1-dat.t$ml.ps)+dat.t$ml.mu1-
       dat.t$ml.mu0
-    reg.t <- glm(Y.tadj ~ dat.t$X, weights = dat.t$q)$coeff
+
+    reg.t <- glm(paste0('Y.tadj ~ ',
+                        paste0(contName, collapse = '+')),
+                 weights = q,
+                 data = dat.t)$coeff
     # EFF
     opt.integ <-
-      rootSolve::multiroot(f = ee1, start = reg.t, dat = dat.integ)$root
+      rootSolve::multiroot(f = ee1, start = reg.t, dat = dat.integ,
+                           contName = contName)$root
     # RT ml
     opt.ml.t <-
-      rootSolve::multiroot(f = ee1.ml, start = reg.t, dat = dat.t)$root
+      rootSolve::multiroot(f = ee1.ml, start = reg.t, dat = dat.t,
+                           contName = contName)$root
     # RW ml
     opt.ml.integ <-
-      rootSolve::multiroot(f = ee1.ml, start = reg.t, dat = dat.integ)$root
+      rootSolve::multiroot(f = ee1.ml, start = reg.t, dat = dat.integ,
+                           contName = contName)$root
 
     # score function
-    S.os1 <- ee1.ml.new(par=opt.ml.t, dat=dat.os)
+    S.os1 <- ee1.ml.new(par=opt.ml.t, dat=dat.os,
+                        contName = contName)
 
     # return the psi estimation
     list(reg.t = reg.t,
@@ -243,6 +398,8 @@ elasticHTE <- function(dat.t, # RT
     Vrt <- var(ptboptee1)*m; Veff <- var(ptboptee2)*m
     Vrt;Veff
     Vrteff <- Vrt-Veff
+    # if the estimate for covariance in finite sample is positive-definite
+    ## break
     if(all(eigen(Vrteff)$values>0)){flag <- FALSE;}
     if(ntime>50){break; cat('wrong \n')}
   }
