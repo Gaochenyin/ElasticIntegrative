@@ -26,6 +26,7 @@
 #' * `TRUE`: use fixed threshold strategy.
 #'   The default fixed threshold is [qchisq(1 -0.05, df = p)],
 #'   in which `p` is the dimension of `X` plus one (i.e., add the intercept).
+#' @param nboot the number of bootstrap samples.
 #' @param alpha a vector for estimating the linear combination of the coefficients for treatment modifiers (depreciated).
 #' @param ... additional arguments to be passed to \code{\link{SuperLearner::SuperLearner()}}.
 #' @returns A list with components:
@@ -77,6 +78,7 @@ elasticHTE <- function(mainName,
                        family.Y = gaussian(),  # family of outcomes
                        thres.psi = sqrt(log(length(dat.os$Y))), # threshold for adaptive CI
                        fixed = FALSE, # fixed c_gamma
+                       nboot = 100, # the number of bootstrap samples
                        alpha = rep(0, length(contName)+1),
                        ...
                        )
@@ -431,7 +433,7 @@ elasticHTE <- function(mainName,
     # begin permutation estimation
     list.ptb <- permutation_est(dat.os = dat.os,
                                 dat.t = dat.t,
-                                nptb = 100)
+                                nptb = nboot)
     ptb <- list.ptb$ptb
     ptb.S.os1 <- list.ptb$ptb.S.os1
     # compute Vrt and Veff

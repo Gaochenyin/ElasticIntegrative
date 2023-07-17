@@ -15,6 +15,7 @@ elasticHTE(
   family.Y = gaussian(),
   thres.psi = sqrt(log(length(dat.os$Y))),
   fixed = FALSE,
+  nboot = 100,
   alpha = rep(0, length(contName) + 1),
   ...
 )
@@ -50,6 +51,8 @@ A list of available functions can be found with \code{\link[SuperLearner:listWra
 The default fixed threshold is \link{qchisq(1 -0.05, df = p)},
 in which \code{p} is the dimension of \code{X} plus one (i.e., add the intercept).
 }}
+
+\item{nboot}{the number of bootstrap samples.}
 
 \item{alpha}{a vector for estimating the linear combination of the coefficients for treatment modifiers (depreciated).}
 

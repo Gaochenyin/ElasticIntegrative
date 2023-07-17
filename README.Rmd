@@ -260,7 +260,8 @@ result.elastic <- elasticHTE(mainName = c('X1', 'X2'),
                              family.Y = binomial(),
                              thres.psi = sqrt(log(m)), # threshold for ACI psi
                              fixed = FALSE,
-                             cvControl = list(V = 1L))
+                             cvControl = list(V = 1L),
+                             nboot = 50)
 ```
 
 ## More examples
