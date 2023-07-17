@@ -17,6 +17,9 @@
 #' @param sl.lib.A A character vector of prediction algorithms to model propensity scores for RWE (and RCT if not specified).
 #' A list of available functions can be found with [SuperLearner::listWrappers()].
 #' @param sl.lib.Y A character vector of prediction algorithms to model conditional outcomes for RCT and RWE.
+#' @param family.Y Currently allows [gaussian()], [quasibinomial()] or [binomial()] to describe the error distribution.
+#' * [gaussian()] (the default): The HTE function is \eqn{Z^T \psi}.
+#' * [quasibinomial()] and [binomial()]: The HTE function is \eqn{{exp(Z^T \psi)-1}/{exp(Z^T \psi)+1}}.
 #' @param thres.psi A numerical value indicating the threshold for constructing adaptive confidence interval.
 #' @param fixed A boolean regarding how to select the tuning parameter `c_gamma`.
 #' * `FALSE` (the default): use adaptive selection strategy
@@ -24,7 +27,7 @@
 #'   The default fixed threshold is [qchisq(1 -0.05, df = p)],
 #'   in which `p` is the dimension of `X` plus one (i.e., add the intercept).
 #' @param alpha a vector for estimating the linear combination of the coefficients for treatment modifiers (depreciated).
-#' @param ... additional arguments to be passed to [SuperLearner::SuperLearner()].
+#' @param ... additional arguments to be passed to \code{\link{SuperLearner::SuperLearner()}}.
 #' @returns A list with components:
 #' * est: estimated `psi` associated with the treatment modifiers.
 #' * ve: estimated standard error for `psi`.
@@ -71,12 +74,24 @@ elasticHTE <- function(mainName,
                        dat.os, # RW,
                        sl.lib.A = c('SL.glm'), # list of methods for A
                        sl.lib.Y = c('SL.glm'), # list of methods for Y
+                       family.Y = gaussian(),  # family of outcomes
                        thres.psi = sqrt(log(length(dat.os$Y))), # threshold for adaptive CI
                        fixed = FALSE, # fixed c_gamma
                        alpha = rep(0, length(contName)+1),
                        ...
                        )
 {
+
+  # check the family type
+  ## only gaussian and binomial outcomes are supported
+  if (is.character(family.Y))
+    family.Y <- get(family.Y, mode = "function", envir = parent.frame())
+  if (is.function(family.Y))
+    family.Y <- family.Y()
+  if (!(family.Y$family)%in%c('gaussian', 'binomial', 'quasibinomial')) {
+    print(family.Y)
+    stop("'family' not supported")
+  }
 
   n.t <- length(dat.t$Y)
   m <- length(dat.os$Y)
@@ -178,6 +193,7 @@ elasticHTE <- function(mainName,
                                X = as.data.frame(dat.t[which(dat.t$A==0), mainName]),
                                SL.library = sl.lib.Y,
                                obsWeights = dat.t$q[which(dat.t$A==0)],
+                               family = family.Y,
                                ...)
     dat.t$mu0 <- predict(mu0.out.t,
                          dat.t[, mainName])$pred
@@ -186,6 +202,7 @@ elasticHTE <- function(mainName,
                                X = as.data.frame(dat.os[which(dat.os$A==0), mainName]),
                                SL.library = sl.lib.Y,
                                obsWeights = dat.os$q[which(dat.os$A==0)],
+                               family = family.Y,
                                ...)
     dat.os$mu0 <- predict(mu0.out.os,
                           dat.os[, mainName])$pred
@@ -223,6 +240,7 @@ elasticHTE <- function(mainName,
                                             X = as.data.frame(dat.t$ml.X.t[which(dat.t$A==1), ]),
                                             SL.library = sl.lib.Y,
                                             obsWeights = dat.t$q[which(dat.t$A==1)],
+                                            family = family.Y,
                                             ...)
     dat.t$ml.mu1 <- predict(mu1.out.t,
                          as.data.frame(dat.t$ml.X.t))$pred
@@ -231,6 +249,7 @@ elasticHTE <- function(mainName,
                                             X = as.data.frame(dat.t$ml.X.t[which(dat.t$A==0), ]),
                                             SL.library = sl.lib.Y,
                                             obsWeights = dat.t$q[which(dat.t$A==0)],
+                                            family = family.Y,
                                             ...)
     dat.t$ml.mu0 <- predict(mu0.out.t,
                             as.data.frame(dat.t$ml.X.t))$pred
@@ -256,6 +275,7 @@ elasticHTE <- function(mainName,
                                             X = as.data.frame(dat.os$ml.X.os[which(dat.os$A==1), ]),
                                             SL.library = sl.lib.Y,
                                             obsWeights = dat.os$q[which(dat.os$A==1)],
+                                            family = family.Y,
                                             ...)
     dat.os$ml.mu1 <- predict(mu1.out.os,
                             as.data.frame(dat.os$ml.X.os))$pred
@@ -264,6 +284,7 @@ elasticHTE <- function(mainName,
                                             X = as.data.frame(dat.os$ml.X.os[which(dat.os$A==0), ]),
                                             SL.library = sl.lib.Y,
                                             obsWeights = dat.os$q[which(dat.os$A==0)],
+                                            family = family.Y,
                                             ...)
     dat.os$ml.mu0 <- predict(mu0.out.os,
                             as.data.frame(dat.os$ml.X.os))$pred
@@ -292,12 +313,6 @@ elasticHTE <- function(mainName,
     # dat.os$ml.mu1 <- cbind(1,dat.os$ml.X.os)%*%
     #   mu1.out.os$coeff
 
-
-    # obtain the sigma_Y for mu_0 and mu_1 RWE
-    dat.os$ml.sigma1 <- sqrt(mean((dat.os$Y[which(dat.os$A==1)] -
-                                     dat.os$ml.mu1[which(dat.os$A==1)])**2))
-    dat.os$ml.sigma0 <- sqrt(mean((dat.os$Y[which(dat.os$A==0)] -
-                                     dat.os$ml.mu0[which(dat.os$A==0)])**2))
     # dat.os$ml.sigma1 <- summary(mu1.out.os)$dispersion
     # dat.os$ml.sigma0 <- summary(mu0.out.os)$dispersion
     dat.integ<-data.frame( Y = c(dat.os$Y, dat.t$Y),
@@ -312,30 +327,57 @@ elasticHTE <- function(mainName,
                      ml.X = rbind(dat.os$ml.X.os,
                                   dat.t$ml.X.t))
     ## covariate adjustment (trial) --> aipw adjusted approach
-    dat.t$Y.tadj<- dat.t$A*(dat.t$Y-dat.t$ml.mu1)/dat.t$ml.ps-
+    dat.t$Y.tadj <- dat.t$A*(dat.t$Y-dat.t$ml.mu1)/dat.t$ml.ps-
       (1-dat.t$A)*(dat.t$Y-dat.t$ml.mu0)/(1-dat.t$ml.ps)+dat.t$ml.mu1-
       dat.t$ml.mu0
 
-    reg.t <- glm(paste0('Y.tadj ~ ',
-                        paste0(contName, collapse = '+')),
-                 weights = q,
-                 data = dat.t)$coeff
+    # if continuous
+    if(family.Y$family == 'gaussian'){
+      reg.t <- glm(paste0('Y.tadj ~ ',
+                          paste0(contName, collapse = '+')),
+                   weights = q,
+                   data = dat.t)$coeff
+
+      # obtain the sigma_Y for mu_0 and mu_1 RWE
+      dat.os$ml.sigma1 <- sqrt(mean((dat.os$Y[which(dat.os$A==1)] -
+                                       dat.os$ml.mu1[which(dat.os$A==1)])**2))
+      dat.os$ml.sigma0 <- sqrt(mean((dat.os$Y[which(dat.os$A==0)] -
+                                       dat.os$ml.mu0[which(dat.os$A==0)])**2))
+    }
+    # if binomial
+    if(family.Y$family%in%c('binomial', 'quasibinomial')){
+      # fit a HTE function for the causal risk difference
+      ## tau(Z) = {exp(psi^T Z) - 1}/{exp(psi^T Z) + 1}
+      reg.t <- optim(par = rep(0, p),
+            fn = function(psi){
+              trt.eff <- cbind(1, as.matrix(dat.t[, contName]))
+              sum((dat.t$Y.tadj - (exp(trt.eff%*%psi) - 1)/
+                (exp(trt.eff%*%psi) + 1))**2)
+            })$par
+      # obtain the sigma_Y for mu_0 and mu_1 RWE
+      dat.os$ml.sigma1 <- sqrt(mean(dat.os$ml.mu1[which(dat.os$A==1)] *
+                                      (1 - dat.os$ml.mu1[which(dat.os$A==1)])))
+      dat.os$ml.sigma0 <- sqrt(mean(dat.os$ml.mu0[which(dat.os$A==0)] *
+                                      (1 - dat.os$ml.mu0[which(dat.os$A==0)])))
+    }
+
+
     # EFF
     opt.integ <-
       rootSolve::multiroot(f = ee1, start = reg.t, dat = dat.integ,
-                           contName = contName)$root
+                           contName = contName, family = family.Y)$root
     # RT ml
     opt.ml.t <-
       rootSolve::multiroot(f = ee1.ml, start = reg.t, dat = dat.t,
-                           contName = contName)$root
+                           contName = contName, family = family.Y)$root
     # RW ml
     opt.ml.integ <-
       rootSolve::multiroot(f = ee1.ml, start = reg.t, dat = dat.integ,
-                           contName = contName)$root
+                           contName = contName, family = family.Y)$root
 
     # score function
     S.os1 <- ee1.ml.new(par=opt.ml.t, dat=dat.os,
-                        contName = contName)
+                        contName = contName, family = family.Y)
 
     # return the psi estimation
     list(reg.t = reg.t,

@@ -139,7 +139,7 @@ GenData <- function(seed = NULL,
 }
 
 # score functions
-ee1 <- function(par, dat, contName) {
+ee1 <- function(par, dat, contName, family = gaussian()) {
   psi <- par
   Y <- dat$Y
   A <- dat$A
@@ -148,11 +148,22 @@ ee1 <- function(par, dat, contName) {
   ps <- dat$ps
   mu0 <- dat$mu0
   H <- Y - A * cbind(1, X) %*% psi
-  apply(cbind(1, X) * matrix((H - mu0) * (A - ps) * q, length(Y), 1 + dim(X)[2], byrow = FALSE), 2, mean)
+  if(family$family == 'gaussian')
+  {
+    sc <- apply(cbind(1, X) * matrix((H - mu0) * (A - ps) * q, length(Y), 1 + dim(X)[2], byrow = FALSE), 2, mean)
+  }
+  if(family$family%in%c('binomial', 'quasibinomial'))
+  {
+    sc <- apply(cbind(1, X) *
+            c({mu0 * (1 - mu0)}^(-1) *
+                        2 * exp(cbind(1, X)%*%psi)/(exp(cbind(1, X)%*%psi) + 1)^2) *
+            matrix((H - mu0) * (A - ps) * q, length(Y), 1 + dim(X)[2], byrow = FALSE), 2, mean)
+  }
+  sc
 }
 
 # score functions divided for sieve approximation
-ee1.ml <- function(par, dat, contName) {
+ee1.ml <- function(par, dat, contName, family = gaussian()) {
   psi <- par
   Y <- dat$Y
   A <- dat$A
@@ -161,11 +172,22 @@ ee1.ml <- function(par, dat, contName) {
   ps <- dat$ml.ps
   mu0 <- dat$ml.mu0
   H <- Y - A * cbind(1, X) %*% psi
-  apply(cbind(1, X) * matrix((H - mu0) * (A - ps) * q, length(Y), 1 + dim(X)[2], byrow = FALSE), 2, mean)
+  if(family$family == 'gaussian')
+  {
+    sc <- apply(cbind(1, X) * matrix((H - mu0) * (A - ps) * q, length(Y), 1 + dim(X)[2], byrow = FALSE), 2, mean)
+  }
+  if(family$family%in%c('binomial', 'quasibinomial'))
+  {
+    sc <- apply(cbind(1, X) *
+            c({mu0 * (1 - mu0)}^(-1) *
+                        2 * exp(cbind(1, X)%*%psi)/(exp(cbind(1, X)%*%psi) + 1)^2) *
+            matrix((H - mu0) * (A - ps) * q, length(Y), 1 + dim(X)[2], byrow = FALSE), 2, mean)
+  }
+  sc
 }
 
 # score functions divided by sigma for sieve approximation
-ee1.ml.new <- function(par, dat, contName) {
+ee1.ml.new <- function(par, dat, contName, family = gaussian()) {
   psi <- par
   Y <- dat$Y
   A <- dat$A
@@ -176,9 +198,20 @@ ee1.ml.new <- function(par, dat, contName) {
   sigma0 <- dat$ml.sigma0
   sigma1 <- dat$ml.sigma1
   H <- Y - A * cbind(1, X) %*% psi
-  apply(sigma0^(-1) * cbind(1, X) * matrix((H - mu0) * (A - ps) * q, length(Y), 1 + dim(X)[2],
-    byrow = FALSE
-  ), 2, mean)
+  if(family$family == 'gaussian')
+  {
+    sc <- apply(sigma0^(-1) * cbind(1, X) * matrix((H - mu0) * (A - ps) * q, length(Y), 1 + dim(X)[2],
+                                             byrow = FALSE
+    ), 2, mean)
+  }
+  if(family$family%in%c('binomial', 'quasibinomial'))
+  {
+    sc <- apply(cbind(1, X) *
+            c({mu0 * (1 - mu0)}^(-1) *
+                        2 * exp(cbind(1, X)%*%psi)/(exp(cbind(1, X)%*%psi) + 1)^2) *
+            matrix((H - mu0) * (A - ps) * q, length(Y), 1 + dim(X)[2], byrow = FALSE), 2, mean)
+  }
+  sc
 }
 
 # handy functions

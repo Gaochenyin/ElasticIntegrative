@@ -11,7 +11,8 @@ elasticHTE(
   dat.t,
   dat.os,
   sl.lib.A = c("SL.glm"),
-  sl.lib.Y = c("SL.glmnet"),
+  sl.lib.Y = c("SL.glm"),
+  family.Y = gaussian(),
   thres.psi = sqrt(log(length(dat.os$Y))),
   fixed = FALSE,
   alpha = rep(0, length(contName) + 1),
@@ -34,6 +35,12 @@ A list of available functions can be found with \code{\link[SuperLearner:listWra
 
 \item{sl.lib.Y}{A character vector of prediction algorithms to model conditional outcomes for RCT and RWE.}
 
+\item{family.Y}{Currently allows \code{\link[=gaussian]{gaussian()}}, \code{\link[=quasibinomial]{quasibinomial()}} or \code{\link[=binomial]{binomial()}} to describe the error distribution.
+\itemize{
+\item \code{\link[=gaussian]{gaussian()}} (the default): The HTE function is \eqn{Z^T \psi}.
+\item \code{\link[=quasibinomial]{quasibinomial()}} and \code{\link[=binomial]{binomial()}}: The HTE function is \eqn{{exp(Z^T \psi)-1}/{exp(Z^T \psi)+1}}.
+}}
+
 \item{thres.psi}{A numerical value indicating the threshold for constructing adaptive confidence interval.}
 
 \item{fixed}{A boolean regarding how to select the tuning parameter \code{c_gamma}.
@@ -46,7 +53,7 @@ in which \code{p} is the dimension of \code{X} plus one (i.e., add the intercept
 
 \item{alpha}{a vector for estimating the linear combination of the coefficients for treatment modifiers (depreciated).}
 
-\item{...}{additional arguments to be passed to \code{\link[SuperLearner:SuperLearner]{SuperLearner::SuperLearner()}}.}
+\item{...}{additional arguments to be passed to \code{\link{SuperLearner::SuperLearner()}}.}
 }
 \value{
 A list with components:

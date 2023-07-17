@@ -15,11 +15,11 @@ real-world evidence study from [Yang et al.,
 
 Two datasets
 
-- The randomized trial contains observations on (A,X,Y), where the
-  treatment assignment A is randomized.
+-   The randomized trial contains observations on (A,X,Y), where the
+    treatment assignment A is randomized.
 
-- The real-world evidence study contains observations on (A,X,Y), where
-  the treatment assignment A may be confounded.
+-   The real-world evidence study contains observations on (A,X,Y),
+    where the treatment assignment A may be confounded.
 
 ## Installation with `devtools`:
 
@@ -32,100 +32,9 @@ library(ElasticIntegrative)
 
 ## Usage
 
-This is an example for illustration
-
-``` r
-library(ElasticIntegrative)
-library(SuperLearner)
-#> 载入需要的程辑包：nnls
-#> 载入需要的程辑包：gam
-#> 载入需要的程辑包：splines
-#> 载入需要的程辑包：foreach
-#> Loaded gam 1.20.2
-#> Super Learner
-#> Version: 2.0-28
-#> Package created on 2021-05-04
-## basic example code for data generation
-set.seed(2333)
-## setups
-p <- 3; beta0 <- c(0, 1, 1, 1) # for the mu0 function
-psi0 <- c(0, 1, 1) # for contrast function
-n <- 1e5; mean.x <- 1 # the whole population
-m <- 2000; tlocalpar <- 0 # size and bias for the RWE
-# -------------------------------
-## begin the data generation
-X1.rt <- rnorm(n, mean.x, 1)
-X2.rt <- rnorm(n, mean.x, 1)
-X3.rt <- rnorm(n, mean.x, 1) 
-X1.os <- rnorm(n, mean.x, 1)
-X2.os <- rnorm(n, mean.x, 1)
-X3.os <- rnorm(n, mean.x, 1) 
-## construct the basis functions
-h.X.rt <- cbind(X1 = X1.rt, X2 = X2.rt, X3 = X3.rt)
-h.X.os <- cbind(X1 = X1.os, X2 = X2.os, X3 = X3.os)
-f.X.rt <- cbind(X1 = X1.rt, X2 = X2.rt)
-f.X.os <- cbind(X1 = X1.os, X2 = X2.os)
-# -------------------------------
-## construct Y for RCT and RWE populations
-### RCT population
-Y0.rt <- cbind(1, h.X.rt) %*% beta0 + rnorm(n, 0, 1)
-Y1.rt <- cbind(1, h.X.rt) %*% beta0 + cbind(1, f.X.rt) %*% psi0 + rnorm(n, 0, 1)
-### RCT sample
-eS <- exp(-4.5 - 2 * X1.rt - 2 * X2.rt)/
-  (1 + exp(-4.5 - 2 * X1.rt - 2 * X2.rt))
-S <- sapply(eS, rbinom, n = 1, size = 1)
-S.ind <- which(S == 1)
-n.t <- length(S.ind)
-### choose the selected patients
-X.rt <- f.X.rt[S.ind, ]
-Y0.rt <- Y0.rt[S.ind]
-Y1.rt <- Y1.rt[S.ind]
-eS.rt <- eS[S.ind]
-### assign treatment to trial participant with equal probabilities
-ps.t <- rep(0.5, n.t)
-A.rt <- rbinom(n.t, 1, ps.t)
-Y.rt <- Y1.rt * A.rt + Y0.rt * (1 - A.rt)
-# -------------------------------
-### RWE population
-Y0.os <- cbind(1, h.X.os) %*% beta0 + rnorm(n, 0, 1)
-Y1.os <- cbind(1, h.X.os) %*% beta0 + cbind(1, f.X.os) %*% psi0 + rnorm(n, 0, 1)
-### OS sample
-P.ind <- sample(1:n, size = m)
-X.os <- f.X.os[P.ind, ]
-X.confounder.os <- X3.os[P.ind]
-Y0.os <- Y0.os[P.ind]
-Y1.os <- Y1.os[P.ind]
-# a.opt is chosen to maintain the proportion of the treated at about .5
-a.opt <- uniroot(function(a) {
-  ps <- exp(a - 1 * X.os[, 1] + 1 * X.os[, 2] - tlocalpar * X.confounder.os)/
-    {1+exp(a - 1 * X.os[, 1] + 1 * X.os[, 2] - tlocalpar * X.confounder.os)}
-  mean(ps) - .5
-}, c(-100, 100))$root
-eA <- exp(a.opt - 1 * X.os[, 1] + 1 * X.os[, 2] - tlocalpar * X.confounder.os)/
-  {1+exp(a.opt - 1 * X.os[, 1] + 1 * X.os[, 2] - tlocalpar * X.confounder.os)}
-A.os <- sapply(eA, rbinom, n = 1, size = 1)
-Y.os <- Y1.os * A.os + Y0.os * (1 - A.os)
-# organize the RT and RW datasets
-dat.t <- data.frame(
-  Y = Y.rt, A = A.rt, X.rt, q = rep(1, n.t),
-  ps = ps.t,
-  ml.ps = ps.t
-)
-
-dat.os <- data.frame(
-  Y = Y.os, A = A.os, X.os, q = rep(1, m)
-  )
-# begin the elastic integrative analysis
-# choice of kappa_n, default is sqrt(log(m)) (similar to the BIC criteria)
-result.elastic <- elasticHTE(mainName = c('X1', 'X2'),
-                             contName = c('X1', 'X2'),
-                             propenName = c('X1', 'X2'),
-                             dat.t = dat.t,
-                             dat.os = dat.os,
-                             thres.psi = sqrt(log(m)), # threshold for ACI psi
-                             fixed = FALSE,
-                             cvControl = list(V = 1L))
-```
+This is an example for illustration when
+![Y](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;Y "Y")
+is a continuous outcome
 
 ## Value
 
@@ -164,15 +73,21 @@ result.elastic <- elasticHTE(mainName = c('X1', 'X2'),
     #> elas.2        0.86455094 1.1823684
     #> elas.3        0.84800403 1.1233989
 
+## Extension
+
+This is additional example for illustration when
+![Y](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;Y "Y")
+is a binary outcome
+
 ## More examples
 
 ``` r
 browseVignettes("ElasticIntegrative")
 ```
 
-- [Simulation: adaptive
-  selection](https://gaochenyin.github.io/ElasticIntegrative/doc/sim_psi011_111)
-- [Simulation: comparing AIPW and
-  SES](https://gaochenyin.github.io/ElasticIntegrative/doc/sim_AIPWvsSES)
-- [Simulation: fixed
-  threshold](https://gaochenyin.github.io/ElasticIntegrative/doc/sim_psi011_111_fixed)
+-   [Simulation: adaptive
+    selection](https://gaochenyin.github.io/ElasticIntegrative/doc/sim_psi011_111)
+-   [Simulation: comparing AIPW and
+    SES](https://gaochenyin.github.io/ElasticIntegrative/doc/sim_AIPWvsSES)
+-   [Simulation: fixed
+    threshold](https://gaochenyin.github.io/ElasticIntegrative/doc/sim_psi011_111_fixed)
