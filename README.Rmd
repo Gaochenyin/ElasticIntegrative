@@ -164,7 +164,7 @@ cbind(lower = c(result.elastic$CIs.inf[c(paste0('covj.t.',1:p),
 
 ## Extension
 This is additional example for illustration when $Y$ is a binary outcome
-```{r example1, include=FALSE}
+```{r example1,  echo=T, results='hide'}
 library(ElasticIntegrative)
 library(SuperLearner)
 ## basic example code for data generation
