@@ -15,11 +15,11 @@ real-world evidence study from [Yang et al.,
 
 Two datasets
 
--   The randomized trial contains observations on (A,X,Y), where the
-    treatment assignment A is randomized.
+- The randomized trial contains observations on (A,X,Y), where the
+  treatment assignment A is randomized.
 
--   The real-world evidence study contains observations on (A,X,Y),
-    where the treatment assignment A may be confounded.
+- The real-world evidence study contains observations on (A,X,Y), where
+  the treatment assignment A may be confounded.
 
 ## Installation with `devtools`:
 
@@ -32,9 +32,7 @@ library(ElasticIntegrative)
 
 ## Usage
 
-This is an example for illustration when
-![Y](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;Y "Y")
-is a continuous outcome
+This is an example for illustration when $Y$ is a continuous outcome.
 
 ## Value
 
@@ -75,9 +73,8 @@ is a continuous outcome
 
 ## Extension
 
-This is additional example for illustration when
-![Y](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;Y "Y")
-is a binary outcome
+This is additional example for illustration when $Y$ is a binary
+outcome.
 
 ``` r
 library(ElasticIntegrative)
@@ -185,9 +182,9 @@ result.elastic <- elasticHTE(mainName = c('X1', 'X2'),
 browseVignettes("ElasticIntegrative")
 ```
 
--   [Simulation: adaptive
-    selection](https://gaochenyin.github.io/ElasticIntegrative/doc/sim_psi011_111)
--   [Simulation: comparing AIPW and
-    SES](https://gaochenyin.github.io/ElasticIntegrative/doc/sim_AIPWvsSES)
--   [Simulation: fixed
-    threshold](https://gaochenyin.github.io/ElasticIntegrative/doc/sim_psi011_111_fixed)
+- [Simulation: adaptive
+  selection](https://gaochenyin.github.io/ElasticIntegrative/doc/sim_psi011_111)
+- [Simulation: comparing AIPW and
+  SES](https://gaochenyin.github.io/ElasticIntegrative/doc/sim_AIPWvsSES)
+- [Simulation: fixed
+  threshold](https://gaochenyin.github.io/ElasticIntegrative/doc/sim_psi011_111_fixed)
