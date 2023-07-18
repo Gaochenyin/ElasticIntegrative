@@ -147,13 +147,14 @@ ee1 <- function(par, dat, contName, family = gaussian()) {
   q <- dat$q
   ps <- dat$ps
   mu0 <- dat$mu0
-  H <- Y - A * cbind(1, X) %*% psi
   if(family$family == 'gaussian')
   {
+    H <- Y - A * cbind(1, X) %*% psi
     sc <- apply(cbind(1, X) * matrix((H - mu0) * (A - ps) * q, length(Y), 1 + dim(X)[2], byrow = FALSE), 2, mean)
   }
   if(family$family%in%c('binomial', 'quasibinomial'))
   {
+    H <- Y - A * (exp(cbind(1, X) %*% psi) - 1)/((exp(cbind(1, X) %*% psi) + 1))
     sc <- apply(cbind(1, X) *
             c({mu0 * (1 - mu0)}^(-1) *
                         2 * exp(cbind(1, X)%*%psi)/(exp(cbind(1, X)%*%psi) + 1)^2) *

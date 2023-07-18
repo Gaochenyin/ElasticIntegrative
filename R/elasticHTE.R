@@ -442,6 +442,7 @@ elasticHTE <- function(mainName,
     Vrt <- var(ptboptee1)*m; Veff <- var(ptboptee2)*m
     Vrt;Veff
     Vrteff <- Vrt-Veff
+    all(eigen(Vrteff)$values>0)
     # if the estimate for covariance in finite sample is positive-definite
     ## break
     if(all(eigen(Vrteff)$values>0)){flag <- FALSE;}
