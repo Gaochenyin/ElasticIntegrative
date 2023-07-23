@@ -11,7 +11,7 @@
 The goal of *ElasticIntegrative* is to implement integrative analyses
 for the heterogenous treatment effect combining a randomized trial and a
 real-world evidence study from [Yang et al.,
-(2022)](https://arxiv.org/abs/2005.10579).
+(2022)](https://shuyang.wordpress.ncsu.edu/files/2023/05/Yang-et-al-2023-Elastic-integrative-analysis.pdf).
 
 Two datasets
 
@@ -75,7 +75,7 @@ This is an example for illustration when $Y$ is a continuous outcome.
 
 Additional functionality is incorporated to handle binary outcomes by
 specifying `family.Y = binomial()`. Note that
-$E\{Y(1)-Y(0)\}=\{\exp(Z^{\intercal}\psi_0)-1\}/\{\exp(Z^{\intercal}\psi_0)+1\}$
+$E\left\{Y(1)-Y(0)\right\}=\left\{\exp(Z^{\intercal}\psi_0)-1\right\}/\left\{\exp(Z^{\intercal}\psi_0)+1\right\}$
 for evaluating treatment effect in terms of binary outcomes may not be
 optimal.
 
