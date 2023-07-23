@@ -163,7 +163,7 @@ cbind(lower = c(result.elastic$CIs.inf[c(paste0('covj.t.',1:p),
 ```
 
 ## Extension
-Additional functionality is incorporated to handle binary outcomes by specifying `family.Y = binomial()`. Note that $E\left\{Y(1)-Y(0)\right\}=\left\{\exp(Z^{\intercal}\psi_0)-1\right\}/\left\{\exp(Z^{\intercal}\psi_0)+1\right\}$ for evaluating treatment effect in terms of binary outcomes may not be optimal.
+Additional functionality is incorporated to handle binary outcomes by specifying `family.Y = binomial()`. Note that $E\{Y(1)-Y(0)\}=\{\exp(Z^{\intercal}\psi_0)-1\}/\{\exp(Z^{\intercal}\psi_0)+1\}$ for evaluating treatment effect in terms of binary outcomes may not be optimal.
 ```{r example1,  eval = FALSE}
 result.elastic <- elasticHTE(mainName = c('X1', 'X2'),
                              contName = c('X1', 'X2'),
