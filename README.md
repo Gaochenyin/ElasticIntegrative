@@ -75,7 +75,7 @@ This is an example for illustration when $Y$ is a continuous outcome.
 
 Additional functionality is incorporated to handle binary outcomes by
 specifying `family.Y = binomial()`. Note that
-$E\{Y(1)-Y(0)\}=\{\exp(Z^{\intercal}\psi_0)-1\}/\{\exp(Z^{\intercal}\psi_0)+1\}$
+$E(Y(1)-Y(0))=(\exp(Z^{\intercal}\psi_0)-1)/(\exp(Z^{\intercal}\psi_0)+1)$
 for evaluating treatment effect in terms of binary outcomes may not be
 optimal.
 
